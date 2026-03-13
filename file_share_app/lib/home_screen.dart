@@ -151,12 +151,72 @@ class _FileShareHomeState extends State<FileShareHome> with SingleTickerProvider
                   fontWeight: FontWeight.w400,
                 ),
                 ),
-                const Spacer(),
+                SizedBox(height: (size.height * 0.08).clamp(20.0, 80.0)),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: GridView.count(
+                    shrinkWrap:true,
+                    physics: NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: size.width * 0.04, 
+                    mainAxisSpacing: size.width * 0.04,
+                    childAspectRatio: 1.1,
+                    children: [
+                      _buildActionIconButton("Send", Icons.near_me_outlined, containerSize, () {
+                        debugPrint("Send tapped");
+                      }),
+                      _buildActionIconButton("Receive", Icons.file_download_outlined, containerSize, () {
+                        debugPrint("Receive tapped");
+                      }),
+                      _buildActionIconButton("History", Icons.history_rounded,containerSize, () {
+                        debugPrint("History tapped");
+                      }),
+                      _buildActionIconButton("Settings", Icons.settings_outlined, containerSize, () {
+                        debugPrint("Settings tapped");
+                      }),
+                    ],
+                    ),
+                  )
               ],
             ),
           ),
         ),
       ),
     );
+
+  }
+  Widget _buildActionIconButton(String title, IconData icon, double containerSize, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(48),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.03), 
+            borderRadius: BorderRadius.circular(48),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1,
+            )
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, 
+            children: [
+              Icon(icon, color: Colors.white, size: containerSize * 0.15,
+              ),
+              SizedBox(height: containerSize * 0.05),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Color(0xFFCBD5E1),
+                  fontSize: containerSize * 0.07,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+        ),
+      ),
+    ));
   }
 }
