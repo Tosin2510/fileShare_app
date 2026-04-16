@@ -1,3 +1,4 @@
+import 'package:file_share_app/send_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -10,7 +11,7 @@ class FileShareHome extends StatefulWidget {
 
 class _FileShareHomeState extends State<FileShareHome> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _rotationAnimation;
+  late Animation<double> _rotationanimation;
   late Animation<double> _pulseScale;
   late Animation<double> _pulseOpacity;
 
@@ -163,8 +164,12 @@ class _FileShareHomeState extends State<FileShareHome> with SingleTickerProvider
                     childAspectRatio: 1.1,
                     children: [
                       _buildActionIconButton("Send", Icons.near_me_outlined, containerSize, () {
-                        debugPrint("Send tapped");
-                      }),
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SendScreen()),
+                      );
+                     }
+                     ),
                       _buildActionIconButton("Receive", Icons.file_download_outlined, containerSize, () {
                         debugPrint("Receive tapped");
                       }),
