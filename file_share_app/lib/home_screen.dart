@@ -24,7 +24,7 @@ class _FileShareHomeState extends State<FileShareHome> with SingleTickerProvider
       duration: const Duration(milliseconds: 2800), 
     );
 
-    _rotationAnimation = Tween<double>(begin: 0, end: math.pi).animate(
+    _rotationanimation = Tween<double>(begin: 0, end: math.pi).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeInOutCubic,
@@ -59,7 +59,7 @@ class _FileShareHomeState extends State<FileShareHome> with SingleTickerProvider
     final size = MediaQuery.of(context).size;
     final bool isSmallScreen = size.height < 700;
     
-    // NEW: This is the size of your square container (60% of screen width)
+    // NEW: This is the size of your square container (60% of screen width) added for responsiveness.
     final double containerSize = size.width * 0.6;
 
     return Scaffold(
@@ -80,7 +80,7 @@ class _FileShareHomeState extends State<FileShareHome> with SingleTickerProvider
                       return Stack(
                         alignment: Alignment.center,
                         children: [
-                          // 1. THE PULSE (Was 150, now 60% of the container)
+                          // 1. THE PULSE (Was 150, now takes up 60% of the container.)
                           Transform.scale(
                             scale: _pulseScale.value,
                             child: Container(
@@ -120,9 +120,9 @@ class _FileShareHomeState extends State<FileShareHome> with SingleTickerProvider
                             ),
                           ),
           
-                          // 3. THE ICON (Was 64, now 25% of the container)
+                          // 3. THE ICON (Was 64, now 25% of the entire container)
                           Transform.rotate(
-                            angle: _rotationAnimation.value,
+                            angle: _rotationanimation.value,
                             child: Icon(
                               Icons.swap_calls_rounded,
                               size: containerSize * 0.25,
@@ -206,7 +206,7 @@ class _FileShareHomeState extends State<FileShareHome> with SingleTickerProvider
             )
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, 
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, color: Colors.white, size: containerSize * 0.15,
               ),
