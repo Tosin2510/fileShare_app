@@ -1,4 +1,4 @@
-import 'package:file_share_app/send_screen.dart';
+import 'package:file_share_app/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -166,18 +166,25 @@ class _FileShareHomeState extends State<FileShareHome> with SingleTickerProvider
                       _buildActionIconButton("Send", Icons.near_me_outlined, containerSize, () {
                        Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SendScreen()),
-                      );
+                        MaterialPageRoute(builder: (context) => const ButtomNavigationBar(initialIndex: 0)),
+                        );
                      }
                      ),
                       _buildActionIconButton("Receive", Icons.file_download_outlined, containerSize, () {
-                        debugPrint("Receive tapped");
-                      }),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ButtomNavigationBar(initialIndex: 1)),
+                        );                      }),
                       _buildActionIconButton("History", Icons.history_rounded,containerSize, () {
-                        debugPrint("History tapped");
-                      }),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ButtomNavigationBar(initialIndex: 2)),
+                        );                      }),
                       _buildActionIconButton("Settings", Icons.settings_outlined, containerSize, () {
-                        debugPrint("Settings tapped");
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ButtomNavigationBar(initialIndex: 3)),
+                        );
                       }),
                     ],
                     ),

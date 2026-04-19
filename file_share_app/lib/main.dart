@@ -1,8 +1,15 @@
 import 'package:file_share_app/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // This defines DeviceOrientation
 
 void main() {
-  runApp(const MyApp());
+  // Ensure orientation is locked to portrait
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+  DeviceOrientation.portraitUp,
+  ]).then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
