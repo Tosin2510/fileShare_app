@@ -12,6 +12,7 @@ class _SendScreenState extends State<SendScreen> {
   String selectedIconButton = 'Images';
   List<PlatformFile> selectedFile = []; // The list of selected files
   bool _isLoading = false; // _isLoading is used to prevent multiple files from opening at the same time.
+  // bool _isScanning = false; // Scanning for nearby devices can take a while. 
   
   // Colors from my figma design.
   final Color activeTabBackground = const Color(0xFF258CF4);
@@ -26,13 +27,13 @@ class _SendScreenState extends State<SendScreen> {
     setState(() => _isLoading = true);
 
     try {
-      FileType type = FileType.any;
-      List<String>? allowedExtensions;
+      FileType type = FileType.any; 
+      List<String>? allowedExtensions; 
       // Allows different file categories to be selected.
       switch (fileCategory) {
         case 'Images': type = FileType.image; break;
         case 'Videos': type = FileType.video; break;
-        case 'Music': type = FileType.audio; break;
+        case 'Music': type = FileType.audio; break; 
         case 'Files': type = FileType.any; break;
         case 'Apps':
           type = FileType.custom;
