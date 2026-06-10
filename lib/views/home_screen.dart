@@ -1,9 +1,7 @@
-// lib/views/home_screen.dart
-
 import 'package:file_share_app/widgets/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import '../widgets/action_icon_button.dart';
-import '../widgets/radar_pulse_animation.dart'; // Import your clean new widget
+import '../widgets/radar_pulse_animation.dart';
 
 class FileShareHome extends StatelessWidget {
   const FileShareHome({super.key});
@@ -24,7 +22,7 @@ class FileShareHome extends StatelessWidget {
               children: [
                 SizedBox(height: size.height * 0.05),
                 
-                // Pure, single-line implementation of your animation!
+                // Pure, single-line implementation of the animated radar pulse effect.
                 RadarPulseAnimation(containerSize: containerSize),
                 
                 SizedBox(height: isSmallScreen ? 20 : 40),
@@ -54,7 +52,7 @@ class FileShareHome extends StatelessWidget {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 2,
-                    crossAxisSpacing: size.width * 0.04, 
+                    crossAxisSpacing: size.width * 0.04,
                     mainAxisSpacing: size.width * 0.04,
                     childAspectRatio: 1.1,
                     children: [
