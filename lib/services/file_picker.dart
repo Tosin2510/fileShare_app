@@ -8,18 +8,18 @@ class FilePickerService {
       switch (fileCategory) {
         case 'Images': type = FileType.image; break;
         case 'Videos': type = FileType.video; break;
-        case 'Audio': type = FileType.audio; break;
+        case 'Music': type = FileType.audio; break;
         case 'Files': type = FileType.any; break;
         case 'Apps':
         type = FileType.custom;
-        allowedExtensions = ['apk'];
+        allowedExtensions = ['apk']; break;
+        default: type = FileType.any;
       }
       FilePickerResult? result = await FilePicker.pickFiles(
         type: type,
-          allowedExtensions: allowedExtensions,
-          allowMultiple: true,
-          withData: false, 
-          lockParentWindow: true,
+        allowedExtensions: allowedExtensions,
+        allowMultiple: true,
+        withData: false,
       );
       if (result != null) {
         return result.files.where((file) => file.path != null).toList();
