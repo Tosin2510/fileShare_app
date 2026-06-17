@@ -12,13 +12,12 @@ class SendScreen extends StatefulWidget {
 
 class _SendScreenState extends State<SendScreen> {
   String selectedIconButton = 'Images';
-  List<PlatformFile> selectedFile = []; 
+  List<PlatformFile> selectedFile = [];
   bool _isLoading = false;
   // Colors from my figma design.
   final Color activeTabBackground = const Color(0xFF258CF4);
   final Color inactiveTabBackground = const Color(0xFF1F1F1F);
   final Color inactiveTabText = const Color(0XFFFFFFFF);
-
   // This is for the file picking logic.
   Future<void>  _pickFiles(String fileCategory) async {
 
@@ -28,8 +27,8 @@ class _SendScreenState extends State<SendScreen> {
     final List<PlatformFile> files = await FilePickerService.pickFiles(fileCategory);
     if (files.isNotEmpty) {
       for (var file in files) {
-        bool alreadySelected = selectedFile.any((selected) => selected.path == file.path);
-        if (!alreadySelected) {
+        bool isAlreadySelected = selectedFile.any((selected) => selected.path == file.path);
+        if (!isAlreadySelected) {
           setState(() => selectedFile.add(file));
         }
       }
@@ -104,18 +103,18 @@ class _SendScreenState extends State<SendScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SendSelectionButton(
-                      buttonRep: 'Image', 
+                      buttonRep: 'Images',
                       icon: Icons.image,
                       containerSize: containerSize,
-                      isActive: selectedIconButton == 'Image',
+                      isActive: selectedIconButton == 'Images',
                       activeTabBackground: activeTabBackground, 
                       inactiveTabBackground: inactiveTabBackground,
                       inactiveTabText: inactiveTabText,
                       onTap: () async {
                         setState(() {
-                          selectedIconButton = 'Image';
+                          selectedIconButton = 'Images';
                         });
-                        await _pickFiles('Image');
+                        await _pickFiles('Images');
                       },
                     ),
                     SendSelectionButton(
@@ -303,7 +302,8 @@ class _SendScreenState extends State<SendScreen> {
                     left: MediaQuery.of(context).size.width * 0.04, 
                     right: MediaQuery.of(context).size.width * 0.04,
                     // Using a percentage of height to stay consistently above the bottom nav
-                    bottom: MediaQuery.of(context).padding.bottom + (MediaQuery.of(context).size.height * 0.02),                    child: GestureDetector(
+                    bottom: MediaQuery.of(context).padding.bottom + (MediaQuery.of(context).size.height * 0.02),                    
+                    child: GestureDetector(
                       onTap: () {
                         // Transfer logic
                       },
