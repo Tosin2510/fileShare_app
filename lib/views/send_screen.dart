@@ -1,5 +1,7 @@
 import 'package:file_share_app/services/file_picker.dart';
+import 'package:file_share_app/services/media_picker.dart';
 import 'package:file_share_app/widgets/send_selection_button.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -11,35 +13,81 @@ class SendScreen extends StatefulWidget {
 }
 
 class _SendScreenState extends State<SendScreen> {
+  int _totalByteSize = 0;
   String selectedIconButton = 'Images';
   List<PlatformFile> selectedFile = [];
+  final MediaPickerService _mediaPickerService = MediaPickerService();
+  List<AssetEntity> selectedMediaFile = [];
+  final List<int> _mediaByteSizes = [];
+
   bool _isLoading = false;
   // Colors from my figma design.
   final Color activeTabBackground = const Color(0xFF258CF4);
   final Color inactiveTabBackground = const Color(0xFF1F1F1F);
   final Color inactiveTabText = const Color(0XFFFFFFFF);
   // This is for the file picking logic.
-  Future<void>  _pickFiles(String fileCategory) async {
-
-    if (_isLoading) return; 
-
+  Future<void> _pickMediaFiles() async{
+    if (_isLoading) return;
     setState(() => _isLoading = true);
-    final List<PlatformFile> files = await FilePickerService.pickFiles(fileCategory);
-    if (files.isNotEmpty) {
-      for (var file in files) {
-        bool isAlreadySelected = selectedFile.any((selected) => selected.path == file.path);
-        if (!isAlreadySelected) {
-          setState(() => selectedFile.add(file));
+    try{
+      final List<AssetEntity>? mediaFiles = await _mediaPickerService.pickMediaFiles(context);
+      if(!mounted) return;
+      if (mediaFiles != null && mediaFiles.isNotEmpty) {
+        for (var mediaFile in mediaFiles) {
+          bool isAlreadySelected = selectedMediaFile.any((selected) => selected.id == mediaFile.id);
+          if (!isAlreadySelected) {
+            selectedMediaFile.add(mediaFile);
+            final fileData = await mediaFile.file;
+            if(fileData != null) {
+              final int sizeInByte = fileData.lengthSync();
+              _mediaByteSizes.add(sizeInByte);
+              setState(() {
+                _totalByteSize += sizeInByte;
+              });
+            } else{
+              _mediaByteSizes.add(0);
+            }
+          }
         }
+    }
+    } catch(e) {
+      debugPrint("Error handling UI selection $e");
+    } finally{
+      if(mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
-    setState(() => _isLoading = false);
+  }
+  Future<void>  _pickFiles(String fileCategory) async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+    try{
+      final List<PlatformFile> files = await FilePickerService.pickFiles(fileCategory);
+      if(!mounted) return;
+      if (files.isNotEmpty) {
+        for (var file in files) {
+          bool isAlreadySelected = selectedFile.any((selected) => selected.path == file.path);
+          if (!isAlreadySelected) {
+            selectedFile.add(file);
+            _totalByteSize += file.size;
+          }
+        }
+      }
+    } catch(e) {
+      debugPrint("Error handling general file selection");
+    } finally{
+      if(mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   // Clear cache when leaving to save user storage space.
   @override
   void dispose() {
-    FilePicker.clearTemporaryFiles();
+    FilePicker.clearTemporaryFiles();                       
     super.dispose();
   }
 
@@ -65,7 +113,7 @@ class _SendScreenState extends State<SendScreen> {
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Icon(
-                      Icons.arrow_back,
+                      Icons.arrow_back, 
                       color: Colors.white,
                       size: containerSize * 0.12,
                     ),
@@ -103,22 +151,22 @@ class _SendScreenState extends State<SendScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SendSelectionButton(
-                      buttonRep: 'Images',
+                      buttonRep: 'Media',
                       icon: Icons.image,
                       containerSize: containerSize,
-                      isActive: selectedIconButton == 'Images',
-                      activeTabBackground: activeTabBackground, 
+                      isActive: selectedIconButton == 'Media',
+                      activeTabBackground: activeTabBackground,
                       inactiveTabBackground: inactiveTabBackground,
                       inactiveTabText: inactiveTabText,
                       onTap: () async {
                         setState(() {
-                          selectedIconButton = 'Images';
+                          selectedIconButton = 'Media';
                         });
-                        await _pickFiles('Images');
+                        await _pickMediaFiles();
                       },
                     ),
                     SendSelectionButton(
-                      buttonRep: "Apps", 
+                      buttonRep: "Apps",
                       icon: Icons.grid_view_rounded, 
                       containerSize: containerSize,
                       isActive: selectedIconButton == 'Apps',
@@ -133,8 +181,8 @@ class _SendScreenState extends State<SendScreen> {
                       },
                     ),
                     SendSelectionButton(
-                      buttonRep: "Music", 
-                      icon: Icons.music_note_outlined, 
+                      buttonRep: "Music",
+                      icon: Icons.music_note_outlined,
                       containerSize: containerSize,
                       isActive: selectedIconButton == 'Music',
                       activeTabBackground: activeTabBackground,
@@ -149,7 +197,7 @@ class _SendScreenState extends State<SendScreen> {
                     ),
                     SendSelectionButton(
                       buttonRep: "Files", 
-                      icon: Icons.description_outlined, 
+                      icon: Icons.description_outlined,
                       containerSize: containerSize,
                       isActive: selectedIconButton == 'Files',
                       activeTabBackground: activeTabBackground,
@@ -162,27 +210,12 @@ class _SendScreenState extends State<SendScreen> {
                         await _pickFiles('Files');
                       },
                     ),
-                    SendSelectionButton(
-                      buttonRep: "Videos", 
-                      icon: Icons.videocam_outlined, 
-                      containerSize: containerSize,
-                      isActive: selectedIconButton == 'Videos',
-                      activeTabBackground: activeTabBackground,
-                      inactiveTabBackground: inactiveTabBackground,
-                      inactiveTabText: inactiveTabText,
-                      onTap: () async {
-                        setState(() {
-                          selectedIconButton = 'Videos';
-                        });
-                        await _pickFiles('Videos');
-                      },
-                    ),
                   ],
                 ),
               ),
 
               // This section shows if files have been selected as well as the size of the selected files.
-              if (selectedFile.isNotEmpty)
+              if (selectedFile.isNotEmpty || selectedMediaFile.isNotEmpty)
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: size.height * 0.02),
                   child: Row(
@@ -190,14 +223,19 @@ class _SendScreenState extends State<SendScreen> {
                     children: [
                       Text(
                         // Starts a counter at 0 and adds the size oif every file in the selected file list to get the size in Mb to 2 decimal places.
-                        "${selectedFile.length} Files • ${(selectedFile.fold(0, (sum, file) => sum + file.size) / (1024 * 1024)).toStringAsFixed(2)} MB",
+                        "${selectedFile.length + selectedMediaFile.length} Files • ${(_totalByteSize / (1024 * 1024)).toStringAsFixed(2)} MB",
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: containerSize * 0.06,
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => setState(() => selectedFile.clear()),
+                        onTap: () => setState(() {
+                          selectedFile.clear();
+                          selectedMediaFile.clear();
+                          _mediaByteSizes.clear();
+                          _totalByteSize = 0;
+                          }),
                         child: Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: containerSize * 0.04,
@@ -226,7 +264,7 @@ class _SendScreenState extends State<SendScreen> {
                     Positioned.fill(
                       child:_isLoading
                       ? const Center(child: CircularProgressIndicator(color: Color(0xFF258CF4)))
-                      : selectedFile.isEmpty
+                      : selectedFile.isEmpty && selectedMediaFile.isEmpty
                             ? Center(
                           child: Text(
                             "No files selected",
@@ -237,9 +275,26 @@ class _SendScreenState extends State<SendScreen> {
                           ),
                         )
                         : ListView.builder(
-                        itemCount: selectedFile.length,
+                        itemCount: selectedFile.length + selectedMediaFile.length,
                         itemBuilder: (context, index) {
-                          final file = selectedFile[index];
+                          final bool isGeneralFile = index < selectedFile.length;
+                          String displayName = '';
+                          double itemSizeInBytes = 0;
+                          IconData leadingIcon = Icons.insert_drive_file_rounded;
+                          if(isGeneralFile) {
+                            final file = selectedFile[index];
+                            displayName = file.name;
+                            itemSizeInBytes = file.size.toDouble();
+                            leadingIcon = Icons.insert_drive_file_rounded;
+                          } else{
+                            final mediaIndex = index - selectedFile.length;
+                            final mediaFile = selectedMediaFile[mediaIndex];
+                            displayName = mediaFile.title?? "Media File";
+                            itemSizeInBytes = _mediaByteSizes[mediaIndex].toDouble(); // Will be handled dynamically below
+                            leadingIcon = mediaFile.type == AssetType.video
+                            ? Icons.video_collection_rounded:
+                            Icons.image_rounded;
+                          }
                           return Container(
                             margin: const EdgeInsets.only(bottom: 12),
                             padding: EdgeInsets.all(containerSize * 0.05),
@@ -250,7 +305,7 @@ class _SendScreenState extends State<SendScreen> {
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.insert_drive_file_rounded,
+                                  leadingIcon,
                                   color: activeTabBackground,
                                   size: containerSize * 0.12,
                                 ),
@@ -261,7 +316,7 @@ class _SendScreenState extends State<SendScreen> {
                                     children: [
                                       Text(
                                         // This displays the file name
-                                        file.name,
+                                        displayName,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: containerSize * 0.065,
@@ -269,11 +324,12 @@ class _SendScreenState extends State<SendScreen> {
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
+                                      if(itemSizeInBytes > 0)
                                       Text(
                                         // This displays the file size. If the file size is greater than 1 Mb, it will display the size in Mb, otherwise, it will display in Kb to 2 decimal places.
-                                        file.size > 1024 * 1024 
-                                          ? "${(file.size / (1024 * 1024)).toStringAsFixed(2)} MB"
-                                          : "${(file.size / 1024).toStringAsFixed(2)} KB",
+                                        itemSizeInBytes > 1024 * 1024 
+                                          ? "${(itemSizeInBytes / (1024 * 1024)).toStringAsFixed(2)} MB"
+                                          : "${(itemSizeInBytes/ 1024).toStringAsFixed(2)} KB",
                                         style: TextStyle(
                                           color: Colors.grey,
                                           fontSize: containerSize * 0.045,
@@ -283,7 +339,17 @@ class _SendScreenState extends State<SendScreen> {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () => setState(() => selectedFile.removeAt(index)),
+                                  onTap: () => setState(() {
+                                    if(isGeneralFile) {
+                                      _totalByteSize -= selectedFile[index].size;
+                                      selectedFile.removeAt(index);
+                                    } else{
+                                      final mediaIndex = index - selectedFile.length;
+                                      _totalByteSize -= _mediaByteSizes[mediaIndex];
+                                      selectedMediaFile.removeAt(mediaIndex);
+                                      _mediaByteSizes.removeAt(mediaIndex);                 
+                                      }
+                                  }),
                                   child: Icon(
                                     Icons.close,
                                     color: Colors.white38,
@@ -296,7 +362,7 @@ class _SendScreenState extends State<SendScreen> {
                         },
                       ),
                 ),
-                if (selectedFile.isNotEmpty)
+                if (selectedFile.isNotEmpty || selectedMediaFile.isNotEmpty)
                   Positioned(
                     // Using a percentage of screen width for horizontal padding
                     left: MediaQuery.of(context).size.width * 0.04, 
@@ -324,7 +390,7 @@ class _SendScreenState extends State<SendScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            "Send ${selectedFile.length} files",
+                            "Send ${selectedFile.length + selectedMediaFile.length} files",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
