@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:file_share_app/services/apk_path_service.dart';
 import 'package:file_share_app/services/file_picker.dart';
 import 'package:file_share_app/services/media_picker.dart';
+import 'package:file_share_app/views/app_picker_screen.dart';
 import 'package:file_share_app/widgets/send_selection_button.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +23,6 @@ class _SendScreenState extends State<SendScreen> {
   final MediaPickerService _mediaPickerService = MediaPickerService();
   List<AssetEntity> selectedMediaFile = [];
   final List<int> _mediaByteSizes = [];
-
   bool _isLoading = false;
   // Colors from my figma design.
   final Color activeTabBackground = const Color(0xFF258CF4);
@@ -174,11 +177,37 @@ class _SendScreenState extends State<SendScreen> {
                       inactiveTabBackground: inactiveTabBackground,
                       inactiveTabText: inactiveTabText,
                       onTap: () async {
-                        setState(() {
-                          selectedIconButton = 'Apps';
-                        });
-                        await _pickFiles('Apps');
-                      },
+                        setState(() => selectedIconButton = 'Apps');
+                        final Map<String, String>? appSelection = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AppPickerScreen(),                            
+                          ),
+                        );
+                          if (!mounted) return;
+                          if (appSelection != null && appSelection.isNotEmpty) {
+                            for (final entry in appSelection.entries) {
+                              final String packageName = entry.key;
+                              final String app = entry.value;
+                              final String? apkPath = await ApkPathService.getApkPath(packageName);
+                              if (apkPath == null) continue; // Skip this step if the Apk path is not found.
+                              final appAvailable = selectedFile.any((b) => b.path == apkPath);
+                              if(!appAvailable) {
+                                final int sizeInBytes = await File(apkPath).length();
+                                setState(() {
+                                  selectedFile.add(
+                                    PlatformFile(
+                                      name: '$app.apk',
+                                      path: apkPath,
+                                      size: sizeInBytes,
+                                    )
+                                    );
+                                    _totalByteSize += sizeInBytes;
+                                });
+                              }
+                            } 
+                          }
+                      }, 
                     ),
                     SendSelectionButton(
                       buttonRep: "Music",
