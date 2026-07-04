@@ -39,6 +39,7 @@ dependencies:
   bonsoir: ^7.1.1
   wechat_assets_picker: ^10.1.2
   installed_apps: ^2.1.1
+  shelf: ^1.4.2
 
 dev_dependencies:
   flutter_test:
