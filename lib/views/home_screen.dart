@@ -1,7 +1,7 @@
-import 'package:file_share_app/widgets/bottom_navigation.dart';
+import 'package:file_share_app/shared/widgets/bottom_navigation.dart';
 import 'package:flutter/material.dart';
-import '../widgets/action_icon_button.dart';
-import '../widgets/radar_pulse_animation.dart';
+import '../shared/widgets/action_icon_button.dart';
+import '../shared/widgets/radar_pulse_animation.dart';
 
 class FileShareHome extends StatelessWidget {
   const FileShareHome({super.key});
