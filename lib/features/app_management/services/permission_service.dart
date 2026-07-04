@@ -8,7 +8,7 @@ class PermissionService{
         androidPermission:AndroidPermission(
           type: RequestType.common,
           mediaLocation: true)
-      )
+      ),
     );
     return permission.hasAccess; 
     } catch(e) {

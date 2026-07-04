@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:bonsoir/bonsoir.dart';
+import 'package:file_share_app/constants/app_constant.dart';
 import 'package:flutter/material.dart';
 
 enum DiscoveryState {idle, starting, stopping, scanning}
 class NetworkDiscovery {
-  static const String _serviceType = '_fileshare._tcp';
   BonsoirDiscovery? _discovery;
   StreamSubscription<BonsoirDiscoveryEvent>? _discoverySubscription;
   DiscoveryState _state = DiscoveryState.idle;
@@ -23,7 +23,7 @@ class NetworkDiscovery {
         _deviceController.add([]);
       }
       try {
-        _discovery = BonsoirDiscovery(type: _serviceType);
+        _discovery = BonsoirDiscovery(type: AppConstant.serviceType);
         await _discovery!.initialize();
         _discoverySubscription = _discovery!.eventStream?.listen((event) {
           handleDiscoveryEvent(event);

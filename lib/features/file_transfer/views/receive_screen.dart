@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Placeholder for Receive Screen
+// To be worked on
 class ReceiveScreen extends StatelessWidget {
   const ReceiveScreen({super.key});
 

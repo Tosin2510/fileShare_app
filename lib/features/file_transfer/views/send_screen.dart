@@ -1,10 +1,11 @@
 import 'dart:io';
 
-import 'package:file_share_app/services/apk_path_service.dart';
-import 'package:file_share_app/services/file_picker.dart';
-import 'package:file_share_app/services/media_picker.dart';
-import 'package:file_share_app/views/app_picker_screen.dart';
-import 'package:file_share_app/widgets/send_selection_button.dart';
+import 'package:file_share_app/features/app_management/services/apk_path_service.dart';
+import 'package:file_share_app/features/app_management/services/file_picker_service.dart';
+import 'package:file_share_app/features/app_management/services/media_picker_service.dart';
+import 'package:file_share_app/features/app_management/views/app_picker_screen.dart';
+import 'package:file_share_app/features/device_discovery/views/device_list.dart';
+import 'package:file_share_app/features/file_transfer/widgets/send_selection_button.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -36,25 +37,29 @@ class _SendScreenState extends State<SendScreen> {
       final List<AssetEntity>? mediaFiles = await _mediaPickerService.pickMediaFiles(context);
       if(!mounted) return;
       if (mediaFiles != null && mediaFiles.isNotEmpty) {
-        for (var mediaFile in mediaFiles) {
-          bool isAlreadySelected = selectedMediaFile.any((selected) => selected.id == mediaFile.id);
-          if (!isAlreadySelected) {
-            selectedMediaFile.add(mediaFile);
+        final List<AssetEntity> newFiles = [];
+        final List<int> newByteSizes = [];
+        int addedBytes = 0;
+        for (final mediaFile in mediaFiles) {
+          final bool isAlreadySelected = selectedMediaFile.any((selected) => selected.id == mediaFile.id);
+          if (!isAlreadySelected) {            
             final fileData = await mediaFile.file;
-            if(fileData != null) {
-              final int sizeInByte = fileData.lengthSync();
-              _mediaByteSizes.add(sizeInByte);
-              setState(() {
-                _totalByteSize += sizeInByte;
-              });
-            } else{
-              _mediaByteSizes.add(0);
-            }
+            final int sizeInBytes = fileData != null? await fileData.length()
+             : 0; // The value of sizeInBytes should be 0 if fileData is null
+             newFiles.add(mediaFile);
+             newByteSizes.add(sizeInBytes);
+             addedBytes += sizeInBytes;
           }
         }
+        if (!mounted) return;
+        setState(() {
+          selectedMediaFile.addAll(newFiles);
+          _mediaByteSizes.addAll(newByteSizes);
+          _totalByteSize += addedBytes;
+        });
     }
     } catch(e) {
-      debugPrint("Error handling UI selection $e");
+      debugPrint("Error handling media selection $e");
     } finally{
       if(mounted) {
         setState(() {
@@ -70,13 +75,20 @@ class _SendScreenState extends State<SendScreen> {
       final List<PlatformFile> files = await FilePickerService.pickFiles(fileCategory);
       if(!mounted) return;
       if (files.isNotEmpty) {
-        for (var file in files) {
-          bool isAlreadySelected = selectedFile.any((selected) => selected.path == file.path);
+        final List<PlatformFile> newFiles = [];
+        int addedBytes = 0;
+        for (final file in files) {
+          final bool isAlreadySelected = selectedFile.any((selected) => selected.path == file.path);
           if (!isAlreadySelected) {
-            selectedFile.add(file);
-            _totalByteSize += file.size;
+            newFiles.add(file);
+            addedBytes += file.size;
           }
         }
+        if (!mounted) return;
+        setState(() {
+          selectedFile.addAll(newFiles);
+          _totalByteSize += addedBytes;
+        });
       }
     } catch(e) {
       debugPrint("Error handling general file selection");
@@ -400,7 +412,24 @@ class _SendScreenState extends State<SendScreen> {
                     bottom: MediaQuery.of(context).padding.bottom + (MediaQuery.of(context).size.height * 0.02),                    
                     child: GestureDetector(
                       onTap: () {
-                        // Transfer logic
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: const Color(0xFF1E1E24),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(24))
+                          ),
+                          builder: (_) => DraggableScrollableSheet(
+                            initialChildSize: 0.6,
+                            minChildSize: 0.4,
+                            maxChildSize: 0.92,
+                            expand: false,
+                            builder:(_, scrollController) => DeviceListScreen(
+                              selectedFiles: selectedFile,
+                              selectedMediaFiles: selectedMediaFile
+                            )
+                          ),
+                        );
                       },
                       child: Container(
                         // Height scales with the screen size

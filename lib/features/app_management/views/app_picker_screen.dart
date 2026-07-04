@@ -1,4 +1,4 @@
-import 'package:file_share_app/services/app_picker_service.dart';
+import 'package:file_share_app/features/app_management/services/app_picker_service.dart';
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 class AppPickerScreen extends StatefulWidget{

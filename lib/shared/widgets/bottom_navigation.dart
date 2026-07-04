@@ -1,7 +1,7 @@
-import 'package:file_share_app/views/history_screen.dart';
-import 'package:file_share_app/views/receive_screen.dart';
-import 'package:file_share_app/views/send_screen.dart';
-import 'package:file_share_app/views/settings.dart';
+import 'package:file_share_app/features/history/views/history_screen.dart';
+import 'package:file_share_app/features/file_transfer/views/receive_screen.dart';
+import 'package:file_share_app/features/file_transfer/views/send_screen.dart';
+import 'package:file_share_app/features/settings/views/settings.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomNavBar extends StatefulWidget {

@@ -1,4 +1,5 @@
 import 'package:bonsoir/bonsoir.dart';
+import 'package:file_share_app/constants/app_constant.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -13,14 +14,14 @@ class NetworkBroadcasting {
   bool get isBroadcasting => _state == BroadcastState.broadcasting;
   String? get lastError => _lastError;
 
-  Future<void> startBroadcasting({required String deviceName, required int port}) async {
+  Future<void> startBroadcasting({required String deviceName}) async {
     if(state != BroadcastState.idle) return;
     _state = BroadcastState.starting;
     _lastError = null;
     final BonsoirService service = BonsoirService(
       name: deviceName,
-      type: serviceType,
-      port: port,
+      type: AppConstant.serviceType,
+      port: AppConstant.transferPort,
       attributes: {
         'version': '1.0.0',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
         'platform': 'flutter'

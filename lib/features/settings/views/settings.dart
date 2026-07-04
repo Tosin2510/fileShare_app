@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Placeholder for Settings Screen
+// To be worked/ improved on.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 

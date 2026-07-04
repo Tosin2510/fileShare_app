@@ -4,7 +4,7 @@
   // A reusable widget for category selection.
   final String title;
   final IconData icon;
-  final double containerSize;        
+  final double containerSize;
   final VoidCallback onTap;
 // immutable wigdget that takes in the title, icon, size, and onTap callback for each category button.
   const ActionIconButton({
@@ -18,13 +18,13 @@
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,  
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(48),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.03),                                                                                                                                  
+            color: Colors.white.withValues(alpha: 0.03),                                                                                                                              
             borderRadius: BorderRadius.circular(48),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.08),

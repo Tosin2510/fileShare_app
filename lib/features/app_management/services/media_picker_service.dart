@@ -1,4 +1,4 @@
-import 'package:file_share_app/services/permission_service.dart';
+import 'package:file_share_app/features/app_management/services/permission_service.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
