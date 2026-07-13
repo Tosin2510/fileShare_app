@@ -1,11 +1,19 @@
 import 'dart:async';
+// import 'dart:io';
 import 'package:bonsoir/bonsoir.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:file_share_app/features/device_discovery/services/device_name_service.dart';
 import 'package:file_share_app/features/device_discovery/services/network_discovery.dart';
 import 'package:file_share_app/features/device_discovery/widgets/build_device_tile.dart';
 import 'package:file_share_app/features/device_discovery/widgets/build_empty_state.dart';
+import 'package:file_share_app/features/file_transfer/services/outgoing_file.dart';
+import 'package:file_share_app/features/file_transfer/services/outgoing_file_converter.dart';
+import 'package:file_share_app/features/file_transfer/services/send_service.dart';
+import 'package:file_share_app/features/network_join/hotspot_info.dart';
+import 'package:file_share_app/features/network_join/screens/wifi_scanner_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:wifi_iot/wifi_iot.dart';
 class DeviceListScreen extends StatefulWidget {
   final List<PlatformFile> selectedFiles;
   final List<AssetEntity> selectedMediaFiles;
@@ -25,6 +33,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
   late AnimationController _refreshAnimation;
   bool _isRefreshing = false;
   final Color _subtleText = const Color(0xFCCCCCCC);
+  final SendService _sendService = SendService();
+  bool _isSending = false;
 
   Future<void> _startScanning() async {
     _deviceSubscription = _networkDiscovery.deviceStream.listen((devices){
@@ -56,13 +66,99 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     setState(() => _devices = []);
     await _networkDiscovery.stopScanning();
     await _startScanning();
-    for (int i=0; i< 10; i++) {
-      await Future.delayed(const Duration(seconds: 1));
-      if(_devices.isNotEmpty) break;
+    await Future.delayed(const Duration(seconds: 3));
+    if(mounted) {
+      _refreshAnimation.stop();
+      _refreshAnimation.reset();
+      if(mounted) setState(() => _isRefreshing = false);
     }
-    _refreshAnimation.stop();
-    _refreshAnimation.reset();
-    if(mounted) setState(() => _isRefreshing = false);
+  }
+
+  Future<void> _handleDeviceTap(BonsoirService device) async {
+    final String? ip = device.hostAddress;
+    if (ip == null) {
+      debugPrint('No Ip address found for ${device.name}');
+      return;
+    }
+    if (_isSending) return; // Added this guard condition against double taps.
+    setState(() => _isSending = true
+    );
+    final outgoingFiles = await OutgoingFileConverter.convertAll(
+      platformFiles: widget.selectedFiles,
+      mediaFiles: widget.selectedMediaFiles,
+    );
+    if (outgoingFiles.isEmpty) {
+      if (mounted) {
+        setState(() => _isSending = false
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No valid files to send.')
+            )
+        );
+      }
+      return;
+    }
+    final senderName = await DeviceNameService.getDeviceName();
+
+    final result = await _sendService.sendFiles(
+      targetIp: ip, 
+      senderDeviceName: senderName, 
+      files: outgoingFiles
+      );
+
+      if (!mounted) return;
+      setState(() => _isSending = false);
+
+      switch (result) {
+        case SendResult.accepted:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Transfer complete!')),
+            );
+            Navigator.pop(context);
+            break;
+        case SendResult.declined:
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${device.name} declined the transfer.')),
+          );
+          break;
+        case SendResult.failed:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('File transfer failed.'))
+          );
+          break;
+      }
+  }
+
+  Future<void> _handleScanQr() async {
+    final HotspotInfo? info = await Navigator.push<HotspotInfo?> (
+      context,
+      MaterialPageRoute(builder: (_) => const WifiScannerScreen()),
+    );
+    if (info == null) {
+      return;
+    }
+    final joined = await WiFiForIoTPlugin.connect(
+      info.ssid,
+      password: info.password,
+      security: NetworkSecurity.WPA,
+      joinOnce: true,
+    );
+    if (!mounted) return;
+    if(joined) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(
+          'Connected to ${info.deviceName}\'s network'
+        )),
+      );
+      await _refresh();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content:
+        Text('Failed to join network. Try manual WiFi settings.'))
+      );
+    }
   }
 
   @override
@@ -141,7 +237,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
                   child: _devices.isEmpty
                   ? BuildEmptyState(
                     containerSize: containerSize, 
-                    isScanning: isScanning
+                    isScanning: isScanning,
+                    onScanQrTap: _handleScanQr,
                     )
                   : ListView.separated(
                     itemCount: _devices.length,
@@ -152,9 +249,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
                       return BuildDeviceTile(
                         containerSize: containerSize,
                         device: device,
-                        onTap:() {
-                          debugPrint("Tapped on $device.name");
-                        },
+                        onTap:() => _handleDeviceTap(device),
                       );
                     }
                     )
