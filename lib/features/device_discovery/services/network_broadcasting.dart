@@ -5,7 +5,6 @@ import 'dart:async';
 
 enum BroadcastState {idle, starting, broadcasting, stopping}
 class NetworkBroadcasting {
-  static const String serviceType = '_fileshare._tcp'; // The app's unique identifier
   BonsoirBroadcast? _broadcast; // The bonsoir engine
   StreamSubscription<BonsoirBroadcastEvent>? _broadcastSubscription;
   BroadcastState _state = BroadcastState.idle;
