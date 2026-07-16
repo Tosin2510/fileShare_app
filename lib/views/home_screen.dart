@@ -62,7 +62,7 @@ class FileShareHome extends StatelessWidget {
                           title: "Send",
                           icon: Icons.near_me_outlined,
                           containerSize: containerSize,
-                          onTap: () => Navigator.pushReplacement(
+                          onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 0)),
                           ),
@@ -71,7 +71,7 @@ class FileShareHome extends StatelessWidget {
                           title: "Receive",
                           icon: Icons.file_download_outlined,
                           containerSize: containerSize,
-                          onTap: () => Navigator.pushReplacement(
+                          onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 1)),
                           ),
@@ -80,7 +80,7 @@ class FileShareHome extends StatelessWidget {
                           title: "History",
                           icon: Icons.history_rounded,
                           containerSize: containerSize,
-                          onTap: () => Navigator.pushReplacement(
+                          onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 2)),
                           ),
@@ -89,7 +89,7 @@ class FileShareHome extends StatelessWidget {
                           title: "Settings",
                           icon: Icons.settings_outlined,
                           containerSize: containerSize,
-                          onTap: () => Navigator.pushReplacement(
+                          onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 3)),
                           ),

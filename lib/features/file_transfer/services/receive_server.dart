@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:file_share_app/constants/app_constant.dart';
+import 'package:file_share_app/features/file_transfer/models/transfer_item.dart';
 import 'package:file_share_app/features/file_transfer/services/incoming_files.dart';
 import 'package:file_share_app/features/file_transfer/services/incoming_session.dart';
+import 'package:file_share_app/features/file_transfer/services/transfer_tracker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_multicast_lock/flutter_multicast_lock.dart';
 import 'package:path_provider/path_provider.dart';
@@ -89,6 +91,15 @@ class ReceiveServer{
     _decisionCompleters.remove(sessionId);
     if (!accepted) {
       _sessions.remove(sessionId);
+    } else {
+      for (final f in files) {
+        TransferTracker.instance.addItem(TransferItem(
+          id: f.fileId, 
+          fileName: f.name, 
+          mimeType: f.mimeType, 
+          totalBytes: f.size, 
+          direction: TransferDirection.received));
+      }
     }
 
     return Response.ok(
@@ -146,11 +157,20 @@ Future<Response> _handleUpload(Request request) async {
      // Stream the file bytes to the disk.
      final File file = File(savePath);
      final IOSink sink = file.openWrite();
-     await request.read().forEach(sink.add);
+     int received = 0;
+     await request.read().forEach((chunk) {
+      sink.add(chunk);
+      received += chunk.length;
+      TransferTracker.instance.updateProgress(
+        fileId, received
+      );
+     });
      await sink.close();
 
+     TransferTracker.instance.markDone(fileId, savedPath: savePath);
      _fileReceivedController.add(savePath);
      debugPrint('File saved: $savePath');
+
      return Response.ok(
       jsonEncode({'status': 'received'}),
       headers: {'Content-Type' : 'application/json'},

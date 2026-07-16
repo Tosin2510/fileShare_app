@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:file_share_app/constants/app_constant.dart';
+import 'package:file_share_app/features/file_transfer/models/transfer_item.dart';
 import 'package:file_share_app/features/file_transfer/services/outgoing_file.dart';
+import 'package:file_share_app/features/file_transfer/services/transfer_tracker.dart';
 import 'package:flutter/foundation.dart';
 
 enum SendResult {accepted, declined, failed}
@@ -20,7 +22,17 @@ class SendService {
     void Function(String fileId, double progress) ? onProgress
   }) async {
     final String sessionId = DateTime.now().millisecondsSinceEpoch.toString();
-    final String baseUrl = 'https://$targetIp:${AppConstant.transferPort}';
+    final String baseUrl = 'http://$targetIp:${AppConstant.transferPort}';
+
+    for (final file in files) {
+      TransferTracker.instance.addItem(TransferItem(
+        id: file.fileId, 
+        fileName: file.name, 
+        mimeType: file.mimeType, 
+        totalBytes: file.size, 
+        direction: TransferDirection.sent)
+        );
+    }
 
     try {
       // This part is the handshake between both device. It blocks on the receiving device end until they either accept or reject.
@@ -39,14 +51,16 @@ class SendService {
 
       final status = prepareResponse.data['status'] as String?;
       if (status != 'accepted') {
-        debugPrint('Transfer declined by receiver');
+        for (final file in files) {
+          TransferTracker.instance.markFailed(file.fileId);
+        }
         return SendResult.declined;
       }
       // This is for uploading each file bytes
       for (final file in files) {
         final fileOnDisk = File(file.path);
         if (!await fileOnDisk.exists()) {
-          debugPrint('File not found on disk: ${file.path}');
+          TransferTracker.instance.markFailed(file.fileId);
           continue;
         }
 
@@ -64,16 +78,20 @@ class SendService {
             }
           ),
           onSendProgress: (sent, total) {
-            if (total > 0 && onProgress != null) {
-              onProgress(file.fileId, sent/total);
-            }
+            TransferTracker.instance.updateProgress(
+              file.fileId,
+              sent 
+            );
           }
         );
-        debugPrint('Uploaded: ${file.name}');
+        TransferTracker.instance.markDone(file.fileId);
       }
       return SendResult.accepted;
     } on DioException catch(e) {
       debugPrint('Send failed: ${e.message}');
+      for (final file in files) {
+        TransferTracker.instance.markFailed(file.fileId);
+      }
       return SendResult.failed;
     } catch(e) {
       debugPrint('Unexpected send error: $e');

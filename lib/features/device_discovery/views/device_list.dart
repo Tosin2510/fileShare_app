@@ -6,14 +6,15 @@ import 'package:file_share_app/features/device_discovery/services/device_name_se
 import 'package:file_share_app/features/device_discovery/services/network_discovery.dart';
 import 'package:file_share_app/features/device_discovery/widgets/build_device_tile.dart';
 import 'package:file_share_app/features/device_discovery/widgets/build_empty_state.dart';
-import 'package:file_share_app/features/file_transfer/services/outgoing_file.dart';
 import 'package:file_share_app/features/file_transfer/services/outgoing_file_converter.dart';
 import 'package:file_share_app/features/file_transfer/services/send_service.dart';
+import 'package:file_share_app/features/file_transfer/views/transfer_progress_screen.dart';
 import 'package:file_share_app/features/network_join/hotspot_info.dart';
 import 'package:file_share_app/features/network_join/screens/wifi_scanner_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wifi_iot/wifi_iot.dart';
+
 class DeviceListScreen extends StatefulWidget {
   final List<PlatformFile> selectedFiles;
   final List<AssetEntity> selectedMediaFiles;
@@ -75,6 +76,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
   }
 
   Future<void> _handleDeviceTap(BonsoirService device) async {
+    debugPrint('=== TAP DEBUG === Device tapped: ${device.name}');
     final String? ip = device.hostAddress;
     if (ip == null) {
       debugPrint('No Ip address found for ${device.name}');
@@ -83,10 +85,13 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     if (_isSending) return; // Added this guard condition against double taps.
     setState(() => _isSending = true
     );
+    try {
+    debugPrint('=== TAP DEBUG === Converting files...');
     final outgoingFiles = await OutgoingFileConverter.convertAll(
       platformFiles: widget.selectedFiles,
       mediaFiles: widget.selectedMediaFiles,
     );
+    debugPrint('=== TAP DEBUG === Converted ${outgoingFiles.length} files');
     if (outgoingFiles.isEmpty) {
       if (mounted) {
         setState(() => _isSending = false
@@ -100,12 +105,24 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
       return;
     }
     final senderName = await DeviceNameService.getDeviceName();
+    debugPrint('=== TAP DEBUG === Sender name: $senderName');
+
+    if(mounted) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const TransferProgressScreen(),
+      );
+    }
+    debugPrint('=== TAP DEBUG === Calling sendFiles...');
 
     final result = await _sendService.sendFiles(
       targetIp: ip, 
       senderDeviceName: senderName, 
       files: outgoingFiles
       );
+      debugPrint('=== TAP DEBUG === Result: $result');
 
       if (!mounted) return;
       setState(() => _isSending = false);
@@ -115,7 +132,6 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Transfer complete!')),
             );
-            Navigator.pop(context);
             break;
         case SendResult.declined:
           ScaffoldMessenger.of(context).showSnackBar(
@@ -129,7 +145,12 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
           );
           break;
       }
+  } catch(e, stack) {
+    debugPrint('===TAP DEBUG === EXCEPTION: $e');
+    debugPrint('=== TAP DEBUG === STACK: $stack');
+    if (mounted) setState(() => _isSending = false);
   }
+}
 
   Future<void> _handleScanQr() async {
     final HotspotInfo? info = await Navigator.push<HotspotInfo?> (
@@ -259,3 +280,4 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
           );
   }
 }
+

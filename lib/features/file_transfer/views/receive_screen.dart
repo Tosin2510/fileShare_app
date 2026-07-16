@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:file_share_app/features/device_discovery/services/device_name_service.dart';
-import 'package:file_share_app/features/file_transfer/services/http_server_service.dart';
+import 'package:file_share_app/features/file_transfer/services/receive_server.dart';
 import 'package:file_share_app/features/file_transfer/services/incoming_session.dart';
+import 'package:file_share_app/features/file_transfer/views/transfer_progress_screen.dart';
 import 'package:file_share_app/shared/widgets/radar_pulse_animation.dart';
 import 'package:flutter/material.dart';
 
@@ -62,6 +63,13 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                   session.sessionId, true
                 );
                 Navigator.pop(context);
+
+                showModalBottomSheet(
+                  context: context, 
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => const TransferProgressScreen(),
+                );
               },
               child: const Text('Accept'),
               )
