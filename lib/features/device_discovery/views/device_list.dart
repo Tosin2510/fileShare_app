@@ -108,11 +108,11 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     debugPrint('=== TAP DEBUG === Sender name: $senderName');
 
     if(mounted) {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => const TransferProgressScreen(),
+      Navigator.of(context, rootNavigator: true).push(
+        MaterialPageRoute(
+          builder: (_) => const TransferProgressScreen(),
+          fullscreenDialog: true,
+        )
       );
     }
     debugPrint('=== TAP DEBUG === Calling sendFiles...');
