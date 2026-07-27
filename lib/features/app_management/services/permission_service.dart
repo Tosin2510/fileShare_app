@@ -7,7 +7,8 @@ class PermissionService{
       requestOption: const PermissionRequestOption(
         androidPermission:AndroidPermission(
           type: RequestType.common,
-          mediaLocation: true)
+          mediaLocation: true
+        )
       ),
     );
     return permission.hasAccess; 

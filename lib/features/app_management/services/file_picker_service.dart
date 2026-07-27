@@ -12,7 +12,7 @@ class FilePickerService {
       FilePickerResult? result = await FilePicker.pickFiles(
         type: type,
         allowMultiple: true,
-        withData: false,
+        withData: false
       );
       if (result != null) {
         return result.files.where((file) => file.path != null).toList();
