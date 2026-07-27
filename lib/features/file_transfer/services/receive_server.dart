@@ -8,6 +8,8 @@ import 'package:file_share_app/features/file_transfer/services/incoming_session.
 import 'package:file_share_app/features/file_transfer/services/transfer_tracker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_multicast_lock/flutter_multicast_lock.dart';
+import 'package:gal/gal.dart';
+import 'package:media_store_plus/media_store_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -150,12 +152,12 @@ Future<Response> _handleUpload(Request request) async {
         body: jsonEncode({'error': 'File not found in session'}) 
         );
      }
-     // Determine the directory to save the incoming files.
-     final Directory saveDir = await _getSaveDirectory(incomingFile.mimeType);
-     final String savePath = '${saveDir.path}/${incomingFile.name}';
+     // Saves incoming file temporarily.
+     final Directory tempDir = await getTemporaryDirectory();
+     final String tempDirPath = '${tempDir.path}/${incomingFile.name}';
 
      // Stream the file bytes to the disk.
-     final File file = File(savePath);
+     final File file = File(tempDirPath);
      final IOSink sink = file.openWrite();
      int received = 0;
      await request.read().forEach((chunk) {
@@ -167,9 +169,15 @@ Future<Response> _handleUpload(Request request) async {
      });
      await sink.close();
 
-     TransferTracker.instance.markDone(fileId, savedPath: savePath);
-     _fileReceivedController.add(savePath);
-     debugPrint('File saved: $savePath');
+     if (incomingFile.mimeType.startsWith('video/') || incomingFile.mimeType.startsWith('image/')) {
+      _saveMediaFiles(tempDirPath, incomingFile.mimeType);
+     } else {
+      _saveGeneralFile(tempDirPath, incomingFile.name, incomingFile.mimeType);
+     }
+
+     TransferTracker.instance.markDone(fileId, savedPath: tempDirPath);
+     _fileReceivedController.add(tempDirPath);
+     debugPrint('File saved: $tempDirPath');
 
      return Response.ok(
       jsonEncode({'status': 'received'}),
@@ -182,25 +190,61 @@ Future<Response> _handleUpload(Request request) async {
       );
   }
 }
-// Gets the location to store the files.
-Future<Directory> _getSaveDirectory(String mimeType) async {
-  final Directory base = await getApplicationDocumentsDirectory();
-  String subFolder = 'FileShare/Files';
-  if(mimeType.startsWith('image/')) {
-    subFolder = 'FileShare/Images';
-  } else if (mimeType.startsWith('video/')) {
-    subFolder = 'FileShare/Videos';
-  } else if (mimeType.startsWith('audio/')) {
-    subFolder = 'FileShare/Audio';
-  } else if(mimeType == 'application/vnd.android.package-archive') {
-    subFolder = 'FileShare/APKs';
-  }
-  final Directory dir = Directory('${base.path}/$subFolder');
-  if(!await dir.exists()) {
-    await dir.create(recursive: true);
-  }
-  return dir;
+
+Future<void> _saveMediaFiles(String filePath, String mimeType) async {
+  try{
+    if (mimeType.startsWith('image/')) {
+      await Gal.putImage(filePath);
+    }
+    else if (mimeType.startsWith('video/')) {
+      await Gal.putVideo(filePath);
+    }
+  } on GalException catch (e) {
+    debugPrint(_galErrorMessage(e.type));
+  } 
 }
+
+ String _galErrorMessage(GalExceptionType exception) {
+    switch(exception) {
+      case GalExceptionType.accessDenied : 
+        return 'You have no permission to access device\'s gallery';
+      case GalExceptionType.notEnoughSpace:
+        return 'Not enough storage space available';
+      case GalExceptionType.notSupportedFormat:
+        return 'File format is not supported';
+      case GalExceptionType.unexpected:
+        return 'Unexpected error occured';
+     }
+    }
+
+    final MediaStore _mediaStore = MediaStore();
+    Future<void> _saveGeneralFile(String tempFilePath, String fileName, String mimeType) async {
+      try {
+        final DirType dirType;
+        final DirName dirName;
+        if (mimeType.startsWith('audio/')) {
+          dirType = DirType.audio;
+          dirName = DirName.music;
+        } else {
+          dirType = DirType.download;
+          dirName = DirName.download;
+        }
+        final SaveInfo? savingInfo = await _mediaStore.saveFile(
+          tempFilePath: tempFilePath, 
+          dirType: dirType, 
+          dirName: dirName,
+          relativePath: null,
+        );
+        if (savingInfo == null) {
+          debugPrint('Failed to save $fileName'); return;
+        } else {
+          debugPrint('Successfully saved $fileName using media store');
+        }
+      } catch (e) {
+        debugPrint('An error occured saving file using mediaStore $e');
+      }
+    }
+
 Future<void> stop() async {
   await _server?.close(force: true);
   _server = null;
