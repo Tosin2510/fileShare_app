@@ -64,11 +64,11 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                 );
                 Navigator.pop(context);
 
-                showModalBottomSheet(
-                  context: context, 
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => const TransferProgressScreen(),
+                Navigator.of(context, rootNavigator: true).push(
+                  MaterialPageRoute(
+                    builder: (_) => const TransferProgressScreen(),
+                    fullscreenDialog: true,
+                  )
                 );
               },
               child: const Text('Accept'),
