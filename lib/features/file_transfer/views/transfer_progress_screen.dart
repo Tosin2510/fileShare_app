@@ -55,109 +55,110 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
     final size = MediaQuery.of(context).size;
     final double overallProgress = _totalBytes == 0 ? 0 : _transferredBytes / _totalBytes;
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF141414),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.maybePop(context),
-                child: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white70),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'Transferring',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-              )
-            ],),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1F1F1F),
-                borderRadius: BorderRadius.circular(12)
-              ),
-              child: Row(
-                children: [
-                  _buildTab('RECEIVED', TransferDirection.received),
-                  _buildTab('SENT', TransferDirection.sent),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            ClipRRect(
-             borderRadius: BorderRadiusGeometry.circular(10),
-             child: Stack(
+    return Scaffold(
+      backgroundColor: const Color(0xFF141414),
+      body: SafeArea(
+        child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               children: [
-                Container(
-                  height: 32,
-                  color: const Color(0xFF1F1F1F)
+                GestureDetector(
+                  onTap: () => Navigator.maybePop(context),
+                  child: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white70),
                 ),
-                FractionallySizedBox(
-                  widthFactor: overallProgress.clamp(0, 1),
-                  child: Container(
+                const SizedBox(width: 8),
+                const Text(
+                  'Transferring',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                )
+              ],),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1F1F1F),
+                  borderRadius: BorderRadius.circular(12)
+                ),
+                child: Row(
+                  children: [
+                    _buildTab('RECEIVED', TransferDirection.received),
+                    _buildTab('SENT', TransferDirection.sent),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+      
+              ClipRRect(
+               borderRadius: BorderRadiusGeometry.circular(10),
+               child: Stack(
+                children: [
+                  Container(
                     height: 32,
-                    color: const Color(0xFF258CFA)
+                    color: const Color(0xFF1F1F1F)
                   ),
-                ),
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          '',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                  FractionallySizedBox(
+                    widthFactor: overallProgress.clamp(0, 1),
+                    child: Container(
+                      height: 32,
+                      color: const Color(0xFF258CFA)
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            '',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${_formatBytes(_transferredBytes)}/${_formatBytes(_totalBytes)}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                          Text(
+                            '${_formatBytes(_transferredBytes)}/${_formatBytes(_totalBytes)}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            )
                           )
-                        )
-                      ],
+                        ],
+                      ),
+                    )
+                  )
+                ],
+               ),
+              ),
+              const SizedBox(height: 16,),
+              Flexible(
+                child: _filteredItems.isEmpty
+                   ? Padding(
+                    padding: EdgeInsets.symmetric(vertical: size.height * 0.06),
+                    child: Center(
+                      child: Text(
+                        _activeTab == TransferDirection.received
+                           ? 'No files received yet'
+                           : 'No files sent yet',
+                        style: const TextStyle(color: Colors.white38),
+                      ),
                     ),
                   )
-                )
-              ],
-             ),
-            ),
-            const SizedBox(height: 16,),
-            Flexible(
-              child: _filteredItems.isEmpty
-                 ? Padding(
-                  padding: EdgeInsets.symmetric(vertical: size.height * 0.06),
-                  child: Center(
-                    child: Text(
-                      _activeTab == TransferDirection.received
-                         ? 'No files received yet'
-                         : 'No files sent yet',
-                      style: const TextStyle(color: Colors.white38),
-                    ),
-                  ),
-                )
-                : ListView.separated(
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) => _buildItemRow(_filteredItems[index]), 
-                  separatorBuilder: (_, _) => const SizedBox(height: 10), 
-                  itemCount: _filteredItems.length
-                )
-            )
-        ],
+                  : ListView.separated(
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) => _buildItemRow(_filteredItems[index]), 
+                    separatorBuilder: (_, _) => const SizedBox(height: 10), 
+                    itemCount: _filteredItems.length
+                  )
+              )
+          ],
+        ),
+      ),
       ),
     );
   }

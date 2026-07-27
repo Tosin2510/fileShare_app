@@ -83,7 +83,7 @@ class FileShareHome extends StatelessWidget {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 2)),
-                          ),
+                          )
                         ),
                         ActionIconButton(
                           title: "Settings",
@@ -92,8 +92,8 @@ class FileShareHome extends StatelessWidget {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 3)),
-                          ),
-                        ),
+                          )
+                        )
                       ],
                     ),
                   )
