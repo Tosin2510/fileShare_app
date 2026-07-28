@@ -11,6 +11,7 @@ import 'package:file_share_app/features/file_transfer/services/send_service.dart
 import 'package:file_share_app/features/file_transfer/views/transfer_progress_screen.dart';
 import 'package:file_share_app/features/network_join/hotspot_info.dart';
 import 'package:file_share_app/features/network_join/screens/wifi_scanner_screen.dart';
+import 'package:file_share_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wifi_iot/wifi_iot.dart';
@@ -107,15 +108,12 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     final senderName = await DeviceNameService.getDeviceName();
     debugPrint('=== TAP DEBUG === Sender name: $senderName');
 
-    if(mounted) {
-      Navigator.of(context, rootNavigator: true).push(
-        MaterialPageRoute(
-          builder: (_) => const TransferProgressScreen(),
-          fullscreenDialog: true,
-        )
-      );
-    }
-    debugPrint('=== TAP DEBUG === Calling sendFiles...');
+   rootNavigatorKey.currentState?.push(
+    MaterialPageRoute(
+      builder: (_) => TransferProgressScreen(),
+      fullscreenDialog: true,
+    )
+   );
 
     final result = await _sendService.sendFiles(
       targetIp: ip, 
