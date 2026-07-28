@@ -6,6 +6,7 @@ import 'package:file_share_app/features/device_discovery/services/network_broadc
 import 'package:file_share_app/features/file_transfer/services/incoming_session.dart';
 import 'package:file_share_app/features/file_transfer/services/receive_server.dart';
 import 'package:file_share_app/features/file_transfer/views/transfer_progress_screen.dart';
+import 'package:file_share_app/rolling_transfer_button.dart';
 import 'package:file_share_app/views/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,9 +33,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorKey: rootNavigatorKey,
       title: 'FileShare',
       theme: ThemeData(useMaterial3: true),
       home: const AppRoot(),
+      builder: (context, child) {
+        return Stack(
+          children: [
+            (child != null) ?child : const RollingTransferButton(),
+          ]
+        );
+      }
     );
   }
 }
