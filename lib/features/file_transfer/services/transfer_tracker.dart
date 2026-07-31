@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:file_share_app/features/file_transfer/models/transfer_item.dart';
+import 'package:file_share_app/features/file_transfer/services/transfer_history.dart';
 
 class TransferTracker {
   TransferTracker._internal();
@@ -33,6 +34,7 @@ class TransferTracker {
     item.transferredBytes = item.totalBytes;
     if (savedPath != null) item.savedPath = savedPath;
     _emit();
+    TransferHistoryService.instance.recordSharing(item);
   }
   
   void markFailed(String id) {
@@ -40,6 +42,7 @@ class TransferTracker {
     if (item == null) return;
     item.status = TransferStatus.failed;
     _emit();
+    TransferHistoryService.instance.recordSharing(item);
   }
   void markPaused(String id) {
     final item = _items.where((i) => i.id == id).firstOrNull;
