@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:file_share_app/features/file_transfer/models/transfer_item.dart';
 import 'package:file_share_app/features/file_transfer/services/transfer_tracker.dart';
+import 'package:file_share_app/features/file_transfer/widgets/tab_toggle_direction.dart';
 import 'package:flutter/material.dart';
 
 class TransferProgressScreen extends StatefulWidget{
@@ -77,19 +78,11 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
                 )
               ],),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F1F1F),
-                  borderRadius: BorderRadius.circular(12)
-                ),
-                child: Row(
-                  children: [
-                    _buildTab('RECEIVED', TransferDirection.received),
-                    _buildTab('SENT', TransferDirection.sent),
-                  ],
-                ),
+              TabToggleDirection(
+                active: _activeTab,
+                onChanged: (direction) => setState(() => _activeTab = direction),
               ),
+              
               const SizedBox(height: 16),
       
               ClipRRect(
@@ -160,30 +153,6 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
         ),
       ),
       ),
-    );
-  }
-  Widget _buildTab(String label, TransferDirection direction) {
-    final bool isActive = _activeTab == direction;
-    return Expanded(
-      child: GestureDetector(
-        onTap:() => setState(() => _activeTab = direction),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF258CFA) : Colors.transparent,
-            borderRadius: BorderRadius.circular(10)
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isActive ? Colors.white : Colors.white54,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
-          ),
-        ),
-      )
     );
   }
   
