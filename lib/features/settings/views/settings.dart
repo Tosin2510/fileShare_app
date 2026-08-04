@@ -197,11 +197,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _settingsRowTile({required String title, String? subtitle, Widget? trailing}) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFF1F1F1F),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
@@ -210,12 +210,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
                 ),
                 if (subtitle != null && subtitle.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(subtitle, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(subtitle, style: const TextStyle(color: Colors.white38, fontSize: 11)),
                   )
               ],
             )
@@ -228,18 +228,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _anotherTile({required String title, required bool value, required ValueChanged<bool> onChanged}) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFF1F1F1F),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Expanded(
-            child: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500))
+            child: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14))
           ),
-          Switch(value: value, onChanged: onChanged, activeThumbColor: const Color(0xFF258CFA),)
+          Transform.scale(
+            scale: 0.85,
+            child: Switch(value: value, onChanged: onChanged, activeThumbColor: const Color(0xFF258CFA),
+            )
+          )
         ]
       )
     );
@@ -250,9 +254,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF258CFA),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      child: Text(label, style: const TextStyle(fontSize: 13)),
+      child: Text(label, style: const TextStyle(fontSize: 12)),
     );
   }
 }
