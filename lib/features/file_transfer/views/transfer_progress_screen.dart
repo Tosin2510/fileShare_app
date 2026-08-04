@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 class TransferProgressScreen extends StatefulWidget{
   const TransferProgressScreen({super.key});
+  static bool isVisible = false;
 
   @override
   State<TransferProgressScreen> createState() => _TransferProgressScreenState();
@@ -20,6 +21,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
   @override
   void initState() {
     super.initState();
+    TransferProgressScreen.isVisible = true;
     _items = TransferTracker.instance.items;
     _sub = TransferTracker.instance.itemsStream.listen((items) {
       if (mounted) setState(() => _items = items);
@@ -27,6 +29,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
   }
   @override
   void dispose() {
+    TransferProgressScreen.isVisible = false;
     _sub?.cancel();
     super.dispose();
   }

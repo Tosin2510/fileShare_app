@@ -47,7 +47,7 @@ StreamSubscription<List<TransferItem>>? _sub;
 
   @override
   Widget build(BuildContext context) {
-    if (!_isTransferActive) {
+    if (!_isTransferActive || TransferProgressScreen.isVisible) {
       return const SizedBox.shrink();
     }
     return Positioned(
