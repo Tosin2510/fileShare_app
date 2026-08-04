@@ -1,6 +1,7 @@
 import 'package:file_share_app/features/app_management/services/app_picker_service.dart';
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
+import 'package:installed_apps/installed_apps.dart';
 class AppPickerScreen extends StatefulWidget{
   const AppPickerScreen({super.key});
   @override
@@ -38,6 +39,7 @@ class _AppPickerScreenState extends State<AppPickerScreen> {
       }
     });
    }
+
    @override
    Widget build(BuildContext context) {
     return Scaffold(
@@ -69,9 +71,20 @@ class _AppPickerScreenState extends State<AppPickerScreen> {
           final app = _apps[index];
           final isSelected = _selectedApps.containsKey(app.packageName);
           return ListTile(
-            leading: app.icon != null
-             ? Image.memory(app.icon!, width: 38, height: 38)
-             : const Icon(Icons.android, size: 38, color: Colors.white),
+            leading: FutureBuilder<AppInfo?>(
+              future: InstalledApps.getAppInfo(app.packageName),
+              builder: (context, snapshot) {
+                final icon = snapshot.data?.icon;
+                if (icon != null) {
+                  return Image.memory(icon, width: 38, height: 38);
+                }
+                return const SizedBox(
+                  width: 38,
+                  height: 38,
+                  child: Icon(Icons.android, color: Colors.white24),
+                );
+              }
+            ),
              title: Text(
               app.name,
               style: const TextStyle(color: Colors.white),
