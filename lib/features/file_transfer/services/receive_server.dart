@@ -94,6 +94,7 @@ class ReceiveServer{
     if (!accepted) {
       _sessions.remove(sessionId);
     } else {
+      TransferTracker.instance.startNewTransferSession();
       for (final f in files) {
         TransferTracker.instance.addItem(TransferItem(
           id: f.fileId, 

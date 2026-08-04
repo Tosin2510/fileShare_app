@@ -24,6 +24,8 @@ class SendService {
     final String sessionId = DateTime.now().millisecondsSinceEpoch.toString();
     final String baseUrl = 'http://$targetIp:${AppConstant.transferPort}';
 
+    TransferTracker.instance.startNewTransferSession();
+
     for (final file in files) {
       TransferTracker.instance.addItem(TransferItem(
         id: file.fileId, 
