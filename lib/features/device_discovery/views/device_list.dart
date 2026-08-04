@@ -19,11 +19,13 @@ import 'package:wifi_iot/wifi_iot.dart';
 class DeviceListScreen extends StatefulWidget {
   final List<PlatformFile> selectedFiles;
   final List<AssetEntity> selectedMediaFiles;
+  final VoidCallback onTransferComplete;
 
   const DeviceListScreen({
     super.key,
     required this.selectedFiles,
-    required this.selectedMediaFiles
+    required this.selectedMediaFiles,
+    required this.onTransferComplete,
   });
   @override
   State<DeviceListScreen> createState() => _DeviceListScreenState();
@@ -130,6 +132,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Transfer complete!')),
             );
+            widget.onTransferComplete();
+            if(mounted) Navigator.of(context).pop();
             break;
         case SendResult.declined:
           ScaffoldMessenger.of(context).showSnackBar(
