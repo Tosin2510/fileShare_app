@@ -6,7 +6,7 @@ class AppPickerService{
     return await InstalledApps.getInstalledApps(
       excludeSystemApps: true,
       excludeNonLaunchableApps: true,
-      withIcon: true,
+      withIcon: false,
       );
   }
 }
