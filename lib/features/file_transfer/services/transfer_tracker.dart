@@ -20,6 +20,11 @@ class TransferTracker {
     _emit();
   }
 
+  void startNewTransferSession() {
+    _items.clear();
+    _emit();
+  }
+
   void updateProgress(String id, int transferredBytes) {
     final item = _items.where((i) => i.id == id).firstOrNull;
     if (item == null) return;
