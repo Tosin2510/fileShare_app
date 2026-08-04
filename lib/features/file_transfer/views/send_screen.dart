@@ -37,27 +37,25 @@ class _SendScreenState extends State<SendScreen> {
       final List<AssetEntity>? mediaFiles = await _mediaPickerService.pickMediaFiles(context);
       if(!mounted) return;
       if (mediaFiles != null && mediaFiles.isNotEmpty) {
-        final List<AssetEntity> newFiles = [];
-        final List<int> newByteSizes = [];
-        int addedBytes = 0;
-        for (final mediaFile in mediaFiles) {
-          final bool isAlreadySelected = selectedMediaFile.any((selected) => selected.id == mediaFile.id);
-          if (!isAlreadySelected) {            
-            final fileData = await mediaFile.file;
-            final int sizeInBytes = fileData != null? await fileData.length()
-             : 0; // The value of sizeInBytes should be 0 if fileData is null
-             newFiles.add(mediaFile);
-             newByteSizes.add(sizeInBytes);
-             addedBytes += sizeInBytes;
-          }
-        }
+        final unselected = mediaFiles.where(
+          (val) => !selectedMediaFile.any((v) => v.id == val.id)
+        ).toList();
+
+        final results = await Future.wait(unselected.map((mediaFiles) async {
+          final fileInfo = await mediaFiles.file;
+          final size = fileInfo != null ? await fileInfo.length() : 0;
+          return MapEntry(mediaFiles, size);
+        }));
+
         if (!mounted) return;
         setState(() {
-          selectedMediaFile.addAll(newFiles);
-          _mediaByteSizes.addAll(newByteSizes);
-          _totalByteSize += addedBytes;
+          for (final entry in results) {
+            selectedMediaFile.add(entry.key);
+            _mediaByteSizes.add(entry.value);
+            _totalByteSize += entry.value;
+          }
         });
-    }
+      }
     } catch(e) {
       debugPrint("Error handling media selection $e");
     } finally{
@@ -426,7 +424,15 @@ class _SendScreenState extends State<SendScreen> {
                             expand: false,
                             builder:(_, scrollController) => DeviceListScreen(
                               selectedFiles: selectedFile,
-                              selectedMediaFiles: selectedMediaFile
+                              selectedMediaFiles: selectedMediaFile,
+                              onTransferComplete: () {
+                                setState(() {
+                                  selectedFile.clear();
+                                  selectedMediaFile.clear();
+                                  _mediaByteSizes.clear();
+                                  _totalByteSize = 0;
+                                });
+                              }
                             )
                           ),
                         );
