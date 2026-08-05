@@ -40,7 +40,8 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return Stack(
           children: [
-            (child != null) ?child : const RollingTransferButton(),
+            child ?? const SizedBox.shrink(),
+            const RollingTransferButton(),
           ]
         );
       }
