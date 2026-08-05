@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 class BuildEmptyState extends StatelessWidget{
   final double containerSize;
   final bool isScanning;
-      final VoidCallback onScanQrTap;
 
   const BuildEmptyState({
     super.key,
     required this.containerSize,
     required this.isScanning,
-    required this.onScanQrTap,
   });
   @override
   Widget build(BuildContext context) {
@@ -43,23 +41,6 @@ class BuildEmptyState extends StatelessWidget{
           ),
           textAlign: TextAlign.center,
             ),
-            SizedBox(height: containerSize * 0.08),
-            TextButton.icon(
-              onPressed: onScanQrTap,
-              icon: Icon(
-                Icons.qr_code_scanner,
-                color: const Color(0xFF258CFA),
-                size: containerSize * 0.08
-              ),
-              label: Text(
-                'Not seeing the device? Scan the QR to connect',
-                style: TextStyle(
-                  color: const Color(0xFF258CFA),
-                  fontSize: containerSize * 0.065,
-                  fontWeight: FontWeight.w500,
-                )
-              )
-            )
         ]
       )
       );

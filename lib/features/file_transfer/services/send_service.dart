@@ -32,8 +32,10 @@ class SendService {
         fileName: file.name, 
         mimeType: file.mimeType, 
         totalBytes: file.size, 
-        direction: TransferDirection.sent)
-        );
+        direction: TransferDirection.sent,
+        savedPath: file.path,
+      )
+    );
     }
 
     try {

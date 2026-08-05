@@ -7,8 +7,6 @@ import 'package:file_share_app/features/file_transfer/views/transfer_progress_sc
 import 'package:file_share_app/shared/widgets/radar_pulse_animation.dart';
 import 'package:flutter/material.dart';
 
-import '../../network_join/hotspot_qr_section.dart';
-
 // Placeholder for Receive Screen
 class ReceiveScreen extends StatefulWidget {
   const ReceiveScreen({super.key});
@@ -17,7 +15,6 @@ class ReceiveScreen extends StatefulWidget {
   State<ReceiveScreen> createState() => _ReceiveScreenState();
 }
 class _ReceiveScreenState extends State<ReceiveScreen> {
-  bool _showQrSection = false;
   StreamSubscription<IncomingSession>? _sessionSubscription;
 
   @override
@@ -97,47 +94,24 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () => setState(() => _showQrSection = !_showQrSection
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Color(0xFF1E1E24),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                   vertical: 12
-                   ),
-                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E24),
-                    borderRadius: BorderRadius.circular(12),
-                   ),
-                   child: Row(
-                    children: [
-                      const Icon(
-                        Icons.qr_code_rounded,
-                        color: Color(0xFF258CFA),
-                        size: 20
-                        ),
-                        const SizedBox(width: 10),
-                        const Expanded(
-                          child: Text(
-                            'Sender can\'t find you? Show QR code',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 13
-                            )
-                          ),
-                          ),
-                          Icon(
-                            _showQrSection ? Icons.expand_less : Icons.expand_more,
-                            color: Colors.white54,
-                          )
-                    ],
+                child: Row(
+                  children: [
+                    const Icon(Icons.wifi_rounded, color: Color(0xFF258CFA), size: 20),
+                    const SizedBox(width: 10,),
+                    const Expanded(
+                      child: Text(
+                        'Make sure both devices are on the same Wi-Fi network to transfer files.',
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                      )
                     )
-                )
+                  ],)
               ),
-              if (_showQrSection) ...[
-                const SizedBox(height: 12),
-                const HotspotQrSection(),
-              ],
               Expanded(
                 child: Center(
                   child: FutureBuilder<String>(

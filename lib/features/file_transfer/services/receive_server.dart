@@ -170,13 +170,18 @@ Future<Response> _handleUpload(Request request) async {
      });
      await sink.close();
 
+     String finalPath = tempDirPath;
+
      if (incomingFile.mimeType.startsWith('video/') || incomingFile.mimeType.startsWith('image/')) {
       _saveMediaFiles(tempDirPath, incomingFile.mimeType);
      } else {
-      _saveGeneralFile(tempDirPath, incomingFile.name, incomingFile.mimeType);
+      final SaveInfo? information = await _saveGeneralFileAndReturnInfo(tempDirPath, incomingFile.name, incomingFile.mimeType);
+      if (information != null && information.isSuccessful) {
+        finalPath = information.uri.toString();
+      }
      }
 
-     TransferTracker.instance.markDone(fileId, savedPath: tempDirPath);
+     TransferTracker.instance.markDone(fileId, savedPath: finalPath);
      _fileReceivedController.add(tempDirPath);
      debugPrint('File saved: $tempDirPath');
 
@@ -219,7 +224,7 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
     }
 
     final MediaStore _mediaStore = MediaStore();
-    Future<void> _saveGeneralFile(String tempFilePath, String fileName, String mimeType) async {
+    Future<SaveInfo?> _saveGeneralFileAndReturnInfo(String tempFilePath, String fileName, String mimeType) async {
       try {
         final DirType dirType;
         final DirName dirName;
@@ -230,19 +235,14 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
           dirType = DirType.download;
           dirName = DirName.download;
         }
-        final SaveInfo? savingInfo = await _mediaStore.saveFile(
+        return await _mediaStore.saveFile(
           tempFilePath: tempFilePath, 
           dirType: dirType, 
           dirName: dirName,
-          relativePath: null,
         );
-        if (savingInfo == null) {
-          debugPrint('Failed to save $fileName'); return;
-        } else {
-          debugPrint('Successfully saved $fileName using media store');
-        }
       } catch (e) {
         debugPrint('An error occured saving file using mediaStore $e');
+        return null;
       }
     }
 

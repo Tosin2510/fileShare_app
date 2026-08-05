@@ -9,12 +9,9 @@ import 'package:file_share_app/features/device_discovery/widgets/build_empty_sta
 import 'package:file_share_app/features/file_transfer/services/outgoing_file_converter.dart';
 import 'package:file_share_app/features/file_transfer/services/send_service.dart';
 import 'package:file_share_app/features/file_transfer/views/transfer_progress_screen.dart';
-import 'package:file_share_app/features/network_join/hotspot_info.dart';
-import 'package:file_share_app/features/network_join/screens/wifi_scanner_screen.dart';
 import 'package:file_share_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:wifi_iot/wifi_iot.dart';
 
 class DeviceListScreen extends StatefulWidget {
   final List<PlatformFile> selectedFiles;
@@ -154,36 +151,6 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
   }
 }
 
-  Future<void> _handleScanQr() async {
-    final HotspotInfo? info = await Navigator.push<HotspotInfo?> (
-      context,
-      MaterialPageRoute(builder: (_) => const WifiScannerScreen()),
-    );
-    if (info == null) {
-      return;
-    }
-    final joined = await WiFiForIoTPlugin.connect(
-      info.ssid,
-      password: info.password,
-      security: NetworkSecurity.WPA,
-      joinOnce: true,
-    );
-    if (!mounted) return;
-    if(joined) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(
-          'Connected to ${info.deviceName}\'s network'
-        )),
-      );
-      await _refresh();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content:
-        Text('Failed to join network. Try manual WiFi settings.'))
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -260,9 +227,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
                   child: _devices.isEmpty
                   ? BuildEmptyState(
                     containerSize: containerSize, 
-                    isScanning: isScanning,
-                    onScanQrTap: _handleScanQr,
-                    )
+                    isScanning: isScanning,                    
+                  )
                   : ListView.separated(
                     itemCount: _devices.length,
                     separatorBuilder: (_, _) =>

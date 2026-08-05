@@ -190,7 +190,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final String? savedPath = row['savedAt'] as String?;
     final String status = row['transferStatus'] as String;
 
-    final bool fileExists = savedPath != null && File(savedPath).existsSync();
+    final bool fileExists = savedPath != null && (savedPath.startsWith('content://') || File(savedPath).existsSync());
     final bool isFailed = status == TransferStatus.failed.name;
 
     String? statusLabel;
