@@ -3,6 +3,7 @@ import 'package:file_share_app/features/device_discovery/services/device_name_se
 import 'package:file_share_app/features/file_transfer/services/transfer_history.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -23,6 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadDeviceName();
     _loadInfoAbtApp();
     _loadCacheSize();
+    _loadAnimationPreference();
   }
 
   Future<void> _loadDeviceName() async {
@@ -46,7 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('CANCEL')
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, false), 
+            onPressed: () => Navigator.pop(context, true), 
             child: const Text('CLEAR')
           )
         ]
@@ -96,6 +98,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await DeviceNameService.setCustomDeviceName(result);
       await _loadDeviceName();
     }
+  }
+
+  Future<void> _loadAnimationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final allowed = prefs.getBool('animation_enabled') ?? true;
+    if (mounted) setState(() => _animationEnabled = allowed);
+  }
+
+  Future<void> _setAnimationPreference(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('animation_enabled', val);
+    setState(() => _animationEnabled = val);
   }
 
   Future<void> _loadCacheSize() async {
@@ -151,7 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _anotherTile(
                 title: 'Animations',
                 value: _animationEnabled,
-                onChanged: (val) => setState(() => _animationEnabled = val)
+                onChanged: _setAnimationPreference
               ),
               _settingsRowTile(
                 title: 'Clear transfer history',
