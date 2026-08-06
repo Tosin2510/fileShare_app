@@ -5,10 +5,12 @@ import 'dart:math' as math;
 
 class RadarPulseAnimation extends StatefulWidget {
   final double containerSize;
+  final bool isAnimated;
 
   const RadarPulseAnimation({
     super.key,
     required this.containerSize,
+    this.isAnimated = true,
   });
 
   @override
@@ -51,7 +53,9 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
       ),
     );
 
-    _controller.repeat(reverse: true);
+    if (widget.isAnimated) {
+      _controller.repeat(reverse: true);
+    }
   }
 
   @override
@@ -72,6 +76,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
             alignment: Alignment.center,
             children: [
               // 1. THE PULSE
+              if (widget.isAnimated)
               Transform.scale(
                 scale: _pulseScale.value,
                 child: Container(
@@ -113,7 +118,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
   
               // 3. THE ROTATING ICON
               Transform.rotate(
-                angle: _rotationAnimation.value,
+                angle: widget.isAnimated ? _rotationAnimation.value : 0,
                 child: Icon(
                   Icons.swap_calls_rounded,
                   size: widget.containerSize * 0.25,
