@@ -1,5 +1,6 @@
 import 'package:file_share_app/shared/widgets/bottom_navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../shared/widgets/action_icon_button.dart';
 import '../shared/widgets/radar_pulse_animation.dart';
 
@@ -25,8 +26,16 @@ class FileShareHome extends StatelessWidget {
                   SizedBox(height: size.height * 0.05),
                   
                   // Pure, single-line implementation of the animated radar pulse effect.
-                  RadarPulseAnimation(containerSize: containerSize),
-                  
+                  FutureBuilder<bool>(
+                    future: SharedPreferences.getInstance().then((val) => val.getBool('animation_enabled') ?? true),
+                    builder: (context, snapshot) {
+                      return RadarPulseAnimation(
+                        containerSize: containerSize,
+                        isAnimated: snapshot.data ?? true,
+                    );
+                    }
+                  ),
+
                   SizedBox(height: isSmallScreen ? 20 : 40),
                   Text(
                     'FileShare',

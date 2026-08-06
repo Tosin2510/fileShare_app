@@ -6,6 +6,7 @@ import 'package:file_share_app/features/file_transfer/services/incoming_session.
 import 'package:file_share_app/features/file_transfer/views/transfer_progress_screen.dart';
 import 'package:file_share_app/shared/widgets/radar_pulse_animation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Placeholder for Receive Screen
 class ReceiveScreen extends StatefulWidget {
@@ -125,8 +126,15 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          RadarPulseAnimation(
-                            containerSize: containerSize),
+                          FutureBuilder<bool>(
+                            future: SharedPreferences.getInstance().then((val) => val.getBool('animation_enabled') ?? true),
+                            builder: (context, snapshot) {
+                              return RadarPulseAnimation(
+                                containerSize: containerSize,
+                                isAnimated: snapshot.data ?? true,
+                          );
+                            }
+                          ),
                             const SizedBox(height: 24),
                             const Text(
                               'Waiting to receive files',
