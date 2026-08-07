@@ -6,6 +6,7 @@ import 'package:file_share_app/features/file_transfer/services/transfer_history.
 import 'package:file_share_app/features/file_transfer/widgets/file_transfer_tile.dart';
 import 'package:file_share_app/features/file_transfer/widgets/tab_toggle_direction.dart';
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -64,8 +65,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   IconData _icon(String mimeType) {
     if (mimeType.startsWith('image/')) return Icons.image_rounded;
-    if (mimeType.startsWith('video/')) return Icons.image_rounded;
-    if (mimeType.startsWith('audio/')) return Icons.image_rounded;
+    if (mimeType.startsWith('video/')) return Icons.videocam_rounded;
+    if (mimeType.startsWith('audio/')) return Icons.music_note_rounded;
     if (mimeType == 'application/vnd.android.package-archive/') return Icons.android_rounded;
     return Icons.insert_drive_file_rounded;
   }
@@ -215,15 +216,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
         onTap: () => _toggleSelected(id),
         child: const Icon(Icons.close_rounded, color: Colors.redAccent, size: 22)
       );
-    } else if (mimeType.startsWith('audio/') || mimeType.startsWith('video/')) {
-      trailing = TextButton(
-        onPressed: () {
-          // To implement opening file using open_file_package
-        }, 
-        child: const Text('Play', style: TextStyle(color: Color(0xFF258CFA), fontSize: 12))
-      );
     } else {
-      trailing = const SizedBox.shrink();
+      trailing = IconButton(
+        onPressed: () async {
+            final outcome = await OpenFile.open(savedPath);
+            if (outcome.type != ResultType.done && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Could not open file: ${outcome.message}'),
+                )
+              );
+          }
+        },
+        icon: const Icon(Icons.open_in_new_rounded, color: Color(0xFF258CFA), size: 20)
+      );
     }
 
     return GestureDetector(
