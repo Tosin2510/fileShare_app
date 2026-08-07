@@ -4,9 +4,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../shared/widgets/action_icon_button.dart';
 import '../shared/widgets/radar_pulse_animation.dart';
 
-class FileShareHome extends StatelessWidget {
+class FileShareHome extends StatefulWidget {
   const FileShareHome({super.key});
 
+  @override
+  State<FileShareHome> createState() => _FileShareHomeState();
+}
+
+class _FileShareHomeState extends State<FileShareHome> {
+
+  Future<void> _refreshUponNavigation(int index) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CustomBottomNavBar(initialIndex: index)
+      )
+    );
+    if(mounted) setState(() {});
+  }
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -71,37 +86,25 @@ class FileShareHome extends StatelessWidget {
                           title: "Send",
                           icon: Icons.near_me_outlined,
                           containerSize: containerSize,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 0)),
-                          ),
+                          onTap: () => _refreshUponNavigation(0),
                         ),
                         ActionIconButton(
                           title: "Receive",
                           icon: Icons.file_download_outlined,
                           containerSize: containerSize,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 1)),
-                          ),
+                          onTap: () => _refreshUponNavigation(1), 
                         ),
                         ActionIconButton(
                           title: "History",
                           icon: Icons.history_rounded,
                           containerSize: containerSize,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 2)),
-                          )
+                          onTap: () => _refreshUponNavigation(2),
                         ),
                         ActionIconButton(
                           title: "Settings",
                           icon: Icons.settings_outlined,
                           containerSize: containerSize,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (routeContext) => CustomBottomNavBar(initialIndex: 3)),
-                          )
+                          onTap: () => _refreshUponNavigation(3),
                         )
                       ],
                     ),
