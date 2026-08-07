@@ -125,7 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadInfoAbtApp() async {
     final info = await PackageInfo.fromPlatform();
-    if (mounted) setState(() => _appVersion = '${info.version} (${info.buildNumber})');
+    if (mounted) setState(() => _appVersion = '${info.version} ');
   }
 
   Future<void> _clearCache() async {
