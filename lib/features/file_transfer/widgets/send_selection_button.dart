@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// For the send selection button.
 class SendSelectionButton extends StatelessWidget {
   final String buttonRep;
   final IconData icon;
@@ -21,6 +22,8 @@ class SendSelectionButton extends StatelessWidget {
     required this.onTap,
   });
 
+// The build.
+// I didn't specify what happens when they tap it here.
   @override
   Widget build(BuildContext context) {
     return Padding(

@@ -4,14 +4,16 @@ import 'package:bonsoir/bonsoir.dart';
 import 'package:file_share_app/constants/app_constant.dart';
 import 'package:flutter/material.dart';
 
+// Handles the various state of the discovery process.
 enum DiscoveryState {idle, starting, stopping, scanning}
+// This class handles the discovery of broadcasted devices on the local network.
 class NetworkDiscovery {
   BonsoirDiscovery? _discovery;
   StreamSubscription<BonsoirDiscoveryEvent>? _discoverySubscription;
   DiscoveryState _state = DiscoveryState.idle;
   final List<BonsoirService> discoveredDevices = [];
   List<String> _selfIps = [];
-  Timer? _livenessCheckTimer; 
+  Timer? _livenessCheckTimer; // I added a liveness timer to be able to track if the discovered devices can stil be reached.
 
   final StreamController<List<BonsoirService>> _deviceController = 
   StreamController<List<BonsoirService>>.broadcast();

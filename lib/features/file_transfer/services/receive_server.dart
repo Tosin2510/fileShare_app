@@ -94,6 +94,7 @@ class ReceiveServer{
     if (!accepted) {
       _sessions.remove(sessionId);
     } else {
+      // Keeps track of new transfer session.
       TransferTracker.instance.startNewTransferSession();
       for (final f in files) {
         TransferTracker.instance.addItem(TransferItem(
@@ -121,6 +122,7 @@ class ReceiveServer{
   }
 }
 
+// Used by the UI to reply to incoming sessions.
 void respondToSession(String sessionId, bool accepted) {
   final completer = _decisionCompleters[sessionId];
   if (completer != null && !completer.isCompleted) {
@@ -128,6 +130,7 @@ void respondToSession(String sessionId, bool accepted) {
   }
 }
 
+// This part handles the file bytes being sent.
 Future<Response> _handleUpload(Request request) async {
   try{
     final String? sessionId = request.url.queryParameters['sessionId'];
@@ -145,6 +148,7 @@ Future<Response> _handleUpload(Request request) async {
         body: jsonEncode({'error': 'Session not found'}),
         );
     }
+    // Checks for valid files in a transfer session.
     final IncomingFile? incomingFile = session.files
      .where((a) => a.fileId == fileId)
      .firstOrNull;
@@ -172,6 +176,7 @@ Future<Response> _handleUpload(Request request) async {
 
      String finalPath = tempDirPath;
 
+// Save based on mime Type.
      if (incomingFile.mimeType.startsWith('video/') || incomingFile.mimeType.startsWith('image/')) {
       _saveMediaFiles(tempDirPath, incomingFile.mimeType);
      } else {
@@ -197,6 +202,8 @@ Future<Response> _handleUpload(Request request) async {
   }
 }
 
+// Handles saving of media files to gallery.
+// I am using gal.
 Future<void> _saveMediaFiles(String filePath, String mimeType) async {
   try{
     if (mimeType.startsWith('image/')) {
@@ -223,9 +230,11 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
      }
     }
 
+// For general files, i am using media store.
     final MediaStore _mediaStore = MediaStore();
     Future<SaveInfo?> _saveGeneralFileAndReturnInfo(String tempFilePath, String fileName, String mimeType) async {
       try {
+        // The directory type and name are gotten.
         final DirType dirType;
         final DirName dirName;
         if (mimeType.startsWith('audio/')) {
@@ -246,6 +255,7 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
       }
     }
 
+// Stops the server.
 Future<void> stop() async {
   await _server?.close(force: true);
   _server = null;
@@ -259,6 +269,7 @@ Future<void> dispose() async {
   for (final c in _decisionCompleters.values) {
     if (!c.isCompleted) c.complete(false);
   }
+  // Clears and closes all the transfer stream...
   _decisionCompleters.clear();
   await _sessionController.close();
   await _fileReceivedController.close();

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// The settings screen.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -27,6 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadAnimationPreference();
   }
 
+// This function takes note of the iser device name.
   Future<void> _loadDeviceName() async {
     final name = await DeviceNameService.getDeviceName();
     if (mounted) {
@@ -36,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+// This function allows users to choose to cler their transfer hist.
   Future<void> _clearTransferHistory() async {
     final clear = await showDialog<bool>(
       context: context,
@@ -54,6 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ]
       )
     );
+    // If the user allows, it clears the trans. hist and show the user a snackbar.
     if (clear == true) {
       final allRow = await TransferHistoryService.instance.getAllTransferHistory();
       final allIds = allRow.map((val) => val['id'] as String).toList();
@@ -66,6 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+// Allows the user to edit the name of their devixes.
   Future<void> _editDeviceName() async {
     final controller = TextEditingController(text: _deviceName);
     final result = await showDialog<String>(
@@ -100,18 +105,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+// This part loads a user to anumation effect choice.
   Future<void> _loadAnimationPreference() async {
     final prefs = await SharedPreferences.getInstance();
     final allowed = prefs.getBool('animation_enabled') ?? true;
     if (mounted) setState(() => _animationEnabled = allowed);
   }
 
+// This allows a user to choose whether they want the animation or not
+// i.e whether it should be still or keep rotating
   Future<void> _setAnimationPreference(bool val) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('animation_enabled', val);
     setState(() => _animationEnabled = val);
   }
 
+// This part basically loads the size of the app cacke.
   Future<void> _loadCacheSize() async {
     final bytes = await CacheService.getCacheSizeInBytes();
     if (mounted) {
@@ -123,6 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+// I just set this one to load the app version 
   Future<void> _loadInfoAbtApp() async {
     final info = await PackageInfo.fromPlatform();
     if (mounted) setState(() => _appVersion = '${info.version} ');
@@ -139,6 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   @override
+  // The build.
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
@@ -196,6 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+  // this part is the heading part of the settings screen.
 
   Widget _sectionHeader(String title) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -209,6 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     )
   );
 
+// This part is for each of the individual row in the setting screen.
   Widget _settingsRowTile({required String title, String? subtitle, Widget? trailing}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -240,6 +253,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+// This part is for the switch button in the settings.
   Widget _anotherTile({required String title, required bool value, required ValueChanged<bool> onChanged}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -263,6 +277,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+// This is the button for the animation on or not on.
   Widget _actionButton(String label, VoidCallback onTap) {
     return ElevatedButton(
       onPressed: onTap,

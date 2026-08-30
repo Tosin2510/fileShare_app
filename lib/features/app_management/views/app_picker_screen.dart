@@ -65,6 +65,8 @@ class _AppPickerScreenState extends State<AppPickerScreen> {
       ),
       body: _isLoading
       ? const Center(child: CircularProgressIndicator())
+
+      // This part creates a list view that shows the installed applications on the device.
       : ListView.builder(
         itemCount: _apps.length,
         itemBuilder: (context, index) {

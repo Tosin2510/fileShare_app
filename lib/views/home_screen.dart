@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../shared/widgets/action_icon_button.dart';
 import '../shared/widgets/radar_pulse_animation.dart';
 
+// Thr home screen of my application.
 class FileShareHome extends StatefulWidget {
   const FileShareHome({super.key});
 
@@ -13,6 +14,7 @@ class FileShareHome extends StatefulWidget {
 
 class _FileShareHomeState extends State<FileShareHome> {
 
+// When the user clicks on the button, it leads to their screens.
   Future<void> _refreshUponNavigation(int index) async {
     await Navigator.push(
       context,
@@ -23,6 +25,7 @@ class _FileShareHomeState extends State<FileShareHome> {
     if(mounted) setState(() {});
   }
   @override
+  // Thr build part.
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final bool isSmallScreen = size.height < 700;
@@ -40,7 +43,7 @@ class _FileShareHomeState extends State<FileShareHome> {
                 children: [
                   SizedBox(height: size.height * 0.05),
                   
-                  // Pure, single-line implementation of the animated radar pulse effect.
+                  // An implementation of the animated radar pulse effect(I created the widget elsewhere.)
                   FutureBuilder<bool>(
                     future: SharedPreferences.getInstance().then((val) => val.getBool('animation_enabled') ?? true),
                     builder: (context, snapshot) {
@@ -73,6 +76,7 @@ class _FileShareHomeState extends State<FileShareHome> {
                   ),
                   SizedBox(height: (size.height * 0.08).clamp(20.0, 80.0)),
                   Padding(
+                    // This is for the button.
                     padding: const EdgeInsets.only(bottom: 24),
                     child: GridView.count(
                       shrinkWrap: true,

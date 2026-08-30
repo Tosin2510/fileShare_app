@@ -5,6 +5,7 @@ import 'package:file_share_app/features/file_transfer/services/transfer_tracker.
 import 'package:file_share_app/features/file_transfer/widgets/tab_toggle_direction.dart';
 import 'package:flutter/material.dart';
 
+// To show the progress of the transfer.
 class TransferProgressScreen extends StatefulWidget{
   const TransferProgressScreen({super.key});
   static bool isVisible = false;
@@ -21,6 +22,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
   @override
   void initState() {
     super.initState();
+    // Shows the transfer progress screen.
     TransferProgressScreen.isVisible = true;
     _items = TransferTracker.instance.items;
     _sub = TransferTracker.instance.itemsStream.listen((items) {
@@ -34,6 +36,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
     super.dispose();
   }
 
+// The filtered items i mentioned here are what is being sent and receive.
   List<TransferItem> get _filteredItems => 
      _items.where((i) => i.direction == _activeTab).toList();
 
@@ -45,7 +48,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
     if (bytes >= 1024) return '${(bytes/ 1024).toStringAsFixed(1)}KB';
     return '${bytes}B';
   }
-
+// Shows the icon based on the mime type for each files.
   IconData _iconFor(String mimeType) {
     if (mimeType.startsWith('image/')) return Icons.image_rounded;
     if (mimeType.startsWith('video/')) return Icons.videocam_rounded;
@@ -55,10 +58,10 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
   }
 
   @override
+  // The build.
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final double overallProgress = _totalBytes == 0 ? 0 : _transferredBytes / _totalBytes;
-
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
       body: SafeArea(
@@ -87,7 +90,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
               ),
               
               const SizedBox(height: 16),
-      
+      // Used a clip rect for the rounded corners from my figma fule.
               ClipRRect(
                borderRadius: BorderRadiusGeometry.circular(10),
                child: Stack(
@@ -96,6 +99,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
                     height: 32,
                     color: const Color(0xFF1F1F1F)
                   ),
+                  // To show the progress.
                   FractionallySizedBox(
                     widthFactor: overallProgress.clamp(0, 1),
                     child: Container(
@@ -117,6 +121,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
                             ),
                           ),
                           Text(
+                            // The transfer progress over the total transfer size.
                             '${_formatBytes(_transferredBytes)}/${_formatBytes(_totalBytes)}',
                             style: const TextStyle(
                               color: Colors.white,

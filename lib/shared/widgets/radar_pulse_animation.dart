@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class RadarPulseAnimation extends StatefulWidget {
+  // The animation...
   final double containerSize;
   final bool isAnimated;
 
@@ -27,6 +28,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
   void initState() {
     super.initState();
     
+    // The controller for that effect.
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2800), 
@@ -39,6 +41,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
       ),
     );
 
+// For the pulsing effect from my figma design...
     _pulseScale = Tween<double>(begin: 1.0, end: 1.8).animate(
       CurvedAnimation(
         parent: _controller,
@@ -64,6 +67,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
     super.dispose();
   }
 
+// The build part...
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -75,7 +79,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
           return Stack(
             alignment: Alignment.center,
             children: [
-              // 1. THE PULSE
+              // The pulsing effect...
               if (widget.isAnimated)
               Transform.scale(
                 scale: _pulseScale.value,
@@ -96,7 +100,6 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
                 ),
               ),
               
-              // 2. MAIN HUB BUTTON
               Container(
                 width: widget.containerSize * 0.7,
                 height: widget.containerSize * 0.7,
@@ -116,7 +119,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
                 ),
               ),
   
-              // 3. THE ROTATING ICON
+              // The icon part that rotates...
               Transform.rotate(
                 angle: widget.isAnimated ? _rotationAnimation.value : 0,
                 child: Icon(

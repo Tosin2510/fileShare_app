@@ -5,6 +5,7 @@ import 'package:file_share_app/features/file_transfer/models/transfer_item.dart'
 import 'package:file_share_app/features/file_transfer/services/transfer_history.dart';
 
 class TransferTracker {
+  // Basically keeps track of file transfer progress
   TransferTracker._internal();
   static final TransferTracker instance = TransferTracker._internal();
 
@@ -12,6 +13,7 @@ class TransferTracker {
   final StreamController<List<TransferItem>> _controller =
     StreamController<List<TransferItem>>.broadcast();
 
+// The transfer stream and the transfer item list.
   Stream<List<TransferItem>> get itemsStream => _controller.stream;
   List<TransferItem> get items => List.unmodifiable(_items);
 
@@ -20,11 +22,13 @@ class TransferTracker {
     _emit();
   }
 
+// Takes note of when a new session is starting.
   void startNewTransferSession() {
     _items.clear();
     _emit();
   }
 
+// This makes sure the transfer progress is updated.
   void updateProgress(String id, int transferredBytes) {
     final item = _items.where((i) => i.id == id).firstOrNull;
     if (item == null) return;
@@ -32,6 +36,7 @@ class TransferTracker {
     item.status = TransferStatus.inProgress;
     _emit();
   }
+  // Marks the end of a transfer.
   void markDone(String id, {String? savedPath}) {
     final item = _items.where((i) => i.id == id).firstOrNull;
     if (item == null) return;
@@ -42,6 +47,7 @@ class TransferTracker {
     TransferHistoryService.instance.recordSharing(item);
   }
   
+  // Takes note of whether the transfer process failed.
   void markFailed(String id) {
     final item = _items.where((i) => i.id == id).firstOrNull;
     if (item == null) return;
@@ -49,6 +55,7 @@ class TransferTracker {
     _emit();
     TransferHistoryService.instance.recordSharing(item);
   }
+  // Takes note of a pause in the transfer.
   void markPaused(String id) {
     final item = _items.where((i) => i.id == id).firstOrNull;
     if (item == null) return;

@@ -4,12 +4,12 @@ import 'package:file_share_app/features/file_transfer/services/outgoing_file.dar
 import 'package:mime/mime.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
+// The outgoing file needs to be converted so that it can move over the local network.
 class OutgoingFileConverter {
   static int _counter = 0;
   static String _nextId() => 'file_${DateTime.now().millisecondsSinceEpoch}_${_counter++}';
 
   // This converts picked files(general files)
-
   static OutgoingFile fromPlatformFile(PlatformFile file) {
     final mimeType = lookupMimeType(file.name) ?? 'application/octet-stream';
     return OutgoingFile(
@@ -39,6 +39,7 @@ class OutgoingFileConverter {
       );
   }
 
+// This converts all file types.
 static Future<List<OutgoingFile>> convertAll({
   List<PlatformFile> platformFiles = const [],
   List<AssetEntity> mediaFiles = const [],

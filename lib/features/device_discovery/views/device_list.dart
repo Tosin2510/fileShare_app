@@ -13,6 +13,7 @@ import 'package:file_share_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
+// The device list, showing device on the local network.
 class DeviceListScreen extends StatefulWidget {
   final List<PlatformFile> selectedFiles;
   final List<AssetEntity> selectedMediaFiles;
@@ -27,6 +28,7 @@ class DeviceListScreen extends StatefulWidget {
   @override
   State<DeviceListScreen> createState() => _DeviceListScreenState();
 }
+
 class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerProviderStateMixin {
   final NetworkDiscovery _networkDiscovery = NetworkDiscovery();
   List<BonsoirService> _devices = [];
@@ -37,6 +39,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
   final SendService _sendService = SendService();
   bool _isSending = false;
 
+// Scans for available devices.
   Future<void> _startScanning() async {
     _deviceSubscription = _networkDiscovery.deviceStream.listen((devices){
       if(mounted) setState(() => _devices = devices);
@@ -61,6 +64,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     super.dispose();
   }
   Future<void> _refresh() async {
+    // Refresh, incase there are other new device already.
     if(_isRefreshing) return;
     setState(() => _isRefreshing = true);
     _refreshAnimation.repeat(reverse: true); // Start the scan
@@ -75,8 +79,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     }
   }
 
+// If the device is tapped on, it will send the files selected already to the tapped devicce.
   Future<void> _handleDeviceTap(BonsoirService device) async {
-    debugPrint('=== TAP DEBUG === Device tapped: ${device.name}');
     final String? ip = device.hostAddress;
     if (ip == null) {
       debugPrint('No Ip address found for ${device.name}');
@@ -86,12 +90,10 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     setState(() => _isSending = true
     );
     try {
-    debugPrint('=== TAP DEBUG === Converting files...');
     final outgoingFiles = await OutgoingFileConverter.convertAll(
       platformFiles: widget.selectedFiles,
       mediaFiles: widget.selectedMediaFiles,
     );
-    debugPrint('=== TAP DEBUG === Converted ${outgoingFiles.length} files');
     if (outgoingFiles.isEmpty) {
       if (mounted) {
         setState(() => _isSending = false
@@ -105,7 +107,6 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
       return;
     }
     final senderName = await DeviceNameService.getDeviceName();
-    debugPrint('=== TAP DEBUG === Sender name: $senderName');
 
    rootNavigatorKey.currentState?.push(
     MaterialPageRoute(
@@ -114,17 +115,18 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     )
    );
 
+// The sending of file
     final result = await _sendService.sendFiles(
       targetIp: ip, 
       senderDeviceName: senderName, 
       files: outgoingFiles
       );
-      debugPrint('=== TAP DEBUG === Result: $result');
 
       if (!mounted) return;
       setState(() => _isSending = false);
 
       switch (result) {
+        // Checks the state of the transfer process.
         case SendResult.accepted:
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Transfer complete!')),
@@ -152,6 +154,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
 }
 
   @override
+  // The build.
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final containerSize = size.width * 0.6;
@@ -225,10 +228,12 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
                 SizedBox(
                   height: size.height * 0.45,
                   child: _devices.isEmpty
+                  // For the empty state, if no device is found.
                   ? BuildEmptyState(
                     containerSize: containerSize, 
                     isScanning: isScanning,                    
                   )
+                  // If device(s) are found, they will be in a list.
                   : ListView.separated(
                     itemCount: _devices.length,
                     separatorBuilder: (_, _) =>
@@ -236,6 +241,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
                     itemBuilder: (context, index) {
                       final device = _devices[index];
                       return BuildDeviceTile(
+                        // The device tile is used here.
                         containerSize: containerSize,
                         device: device,
                         onTap:() => _handleDeviceTap(device),

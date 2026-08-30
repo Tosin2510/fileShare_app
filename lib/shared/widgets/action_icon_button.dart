@@ -1,12 +1,12 @@
  import 'package:flutter/material.dart';
 
  class ActionIconButton extends StatelessWidget {
-  // A reusable widget for category selection.
+  // This is for the selection of the different categories.
   final String title;
   final IconData icon;
   final double containerSize;
   final VoidCallback onTap;
-// immutable wigdget that takes in the title, icon, size, and onTap callback for each category button.
+  // It considered the title, the icon and so on.
   const ActionIconButton({
     super.key,
     required this.title,
@@ -16,6 +16,8 @@
   });
 
   @override
+  // The build
+  // This part also decide the state of the selected button. The colour also changes sha...
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,

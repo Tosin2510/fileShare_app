@@ -6,6 +6,7 @@ class TabToggleDirection extends StatelessWidget {
   final ValueChanged<TransferDirection> onChanged;
   const TabToggleDirection({super.key, required this.active, required this.onChanged});
 
+// FOr the send and receive tab, since they are beside each other.
   @override 
   Widget build(BuildContext context) {
     return Container(
@@ -23,6 +24,7 @@ class TabToggleDirection extends StatelessWidget {
     );
   }
 
+// This is for the send and the receive tab.
   Widget _tab(String label, TransferDirection direction) {
     final bool isActive = active == direction;
     return Expanded(

@@ -1,3 +1,4 @@
+// This model handles a file that is being sent to another device.
 class OutgoingFile {
   final String fileId;
   final String name;

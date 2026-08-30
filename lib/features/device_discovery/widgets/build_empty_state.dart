@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// This handles the empty state of network discovery screen.
 class BuildEmptyState extends StatelessWidget{
   final double containerSize;
   final bool isScanning;
@@ -8,6 +9,7 @@ class BuildEmptyState extends StatelessWidget{
     required this.containerSize,
     required this.isScanning,
   });
+  // The empty state...the build
   @override
   Widget build(BuildContext context) {
     return Center(

@@ -1,6 +1,7 @@
 enum TransferDirection {sent, received}
 enum TransferStatus {waiting, inProgress, paused, done, failed}
 
+// Handles which item is sent or received.
 class TransferItem {
   final String id;
   final String fileName;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+// This class is to store the hotspot info of the device.
 class HotspotInfo{
   final String ssid; // To access the current network name
   final String password;

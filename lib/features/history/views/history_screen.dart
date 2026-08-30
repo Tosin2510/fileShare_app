@@ -8,6 +8,7 @@ import 'package:file_share_app/features/file_transfer/widgets/tab_toggle_directi
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 
+// For the history screen...
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
@@ -28,6 +29,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _loadHistory();
   }
 
+// This is the loasing of the screen.
   Future<void> _loadHistory() async {
     final rows = await TransferHistoryService.instance.getAllTransferHistory();
     if (mounted) {
@@ -42,6 +44,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       .where((r) => r['transferDirection'] == _activeTab.name)
       .toList();
 
+// This part is to actually group the transfer hist. by date.
   Map<String, List<Map<String, dynamic>>> get _dateGrouping {
     final Map<String, List<Map<String, dynamic>>> groups = {};
     for (final row in _rows) {
@@ -63,6 +66,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
+// Depending on the mime type, we get the correct icon.
   IconData _icon(String mimeType) {
     if (mimeType.startsWith('image/')) return Icons.image_rounded;
     if (mimeType.startsWith('video/')) return Icons.videocam_rounded;
@@ -71,12 +75,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Icons.insert_drive_file_rounded;
   }
 
+// This is for the size in byte of the files in the history screen.
   String _byteFormat(int bytes) {
     if (bytes >= 1024 * 1024) return '${(bytes/ (1024 * 1024)).toStringAsFixed(2)}MB';
     if (bytes >= 1024) return '${(bytes/ 1024).toStringAsFixed(2)}KB';
     return '${bytes}B';
   }
 
+// Users can choose to delect whatever history they choose.
   Future<void> _deleteSelectedHistory() async {
     await TransferHistoryService.instance.deleteTransferHistory(_selectedItemIds.toList());
     setState(() {
@@ -86,6 +92,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     await _loadHistory();
   }
 
+// This shows the date of the transger.
   String _dateHeader(DateTime date) {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 
@@ -96,7 +103,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-
+// The buils.
     return Scaffold(
       backgroundColor: Color(0xFF141414),
       body: SafeArea(
@@ -124,6 +131,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ],
               ),
               const SizedBox(height: 16,),
+              // For the received and sent history.
               TabToggleDirection(
                 active: _activeTab,
                 onChanged: (direction) => setState(() => _activeTab = direction),
@@ -135,6 +143,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   : _rows.isEmpty
                     ? const Center(child: Text('No history yet', style: TextStyle(color: Colors.white38))
                 )
+                // The listview is used for easy scrolling.
                 : ListView(
                   children: _dateGrouping.entries.map((entry) {
                     return Column(
@@ -163,6 +172,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 )
               ),
 
+              // Checks if the user selects anything, if they do, it shows the delete button.
               if (_selectionMethod && _selectedItemIds.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -183,6 +193,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+// Thid is the individual row for the transfer history.
   Widget _buildRow(Map<String, dynamic> row) {
     final String id = row['id'] as String;
     final String fileName = row['fileName'] as String;
@@ -191,6 +202,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final String? savedPath = row['savedAt'] as String?;
     final String status = row['transferStatus'] as String;
 
+// basically checks if the file still exists on the device.
     final bool fileExists = savedPath != null && (savedPath.startsWith('content://') || File(savedPath).existsSync());
     final bool isFailed = status == TransferStatus.failed.name;
 
@@ -203,7 +215,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       statusLabel = 'File not found';
       statusColor = Colors.redAccent;
     }
-
+    // cONFIRMS IF THE file is on the device still or not.
     Widget trailing;
     if (_selectionMethod) {
       trailing = Checkbox(
@@ -231,7 +243,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         icon: const Icon(Icons.open_in_new_rounded, color: Color(0xFF258CFA), size: 20)
       );
     }
-
+// On long press, the user can choose what to delete.
     return GestureDetector(
       onLongPress: () {
         setState(() {

@@ -10,6 +10,7 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
+// For sending files.
 class SendScreen extends StatefulWidget {
   const SendScreen({super.key});
 
@@ -66,6 +67,7 @@ class _SendScreenState extends State<SendScreen> {
       }
     }
   }
+  // For picking general files.
   Future<void>  _pickFiles(String fileCategory) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
@@ -105,6 +107,7 @@ class _SendScreenState extends State<SendScreen> {
   }
 
   @override
+  // The build.
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final double containerSize = size.width * 0.6;
@@ -163,6 +166,7 @@ class _SendScreenState extends State<SendScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Buttons for selecting files, music and so on.
                     SendSelectionButton(
                       buttonRep: "Files", 
                       icon: Icons.description_outlined,

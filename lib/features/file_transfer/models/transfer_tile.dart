@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+// This model is used in the ui for the transfer tile.
 class TransferTile {
   final String id;
   final String fileName;

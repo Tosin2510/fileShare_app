@@ -7,6 +7,7 @@ class DeviceNameService{
   static const _suffixKey = 'device_suffix';
   static const _customDeviceNameKey = 'custom_device_name';
 
+// This part is responsible for getting the name of the device.
   static Future<String> getDeviceName() async {
     final prefs = await SharedPreferences.getInstance();
     final customName = prefs.getString(_customDeviceNameKey);
@@ -16,6 +17,7 @@ class DeviceNameService{
     return '$baseName ($suffix)';
   }
 
+// This basically allows users to set their preferred name for their device.
   static Future<void> setCustomDeviceName(String? name) async {
     final prefs = await SharedPreferences.getInstance();
     if (name == null || name.trim().isEmpty) {
@@ -25,6 +27,7 @@ class DeviceNameService{
     }
   }
 
+// The custom device name set by the user is got here.
   static Future<String?> getCustomDeviceName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_customDeviceNameKey);
@@ -44,6 +47,9 @@ class DeviceNameService{
     }
     return 'Unknown Device';
   }
+
+  // I actually added this function so that no two device with the same device name can be seen the same way in the device list.
+  // If two or more device have the same name, random suffix is added to the end of the device name.
   static Future<String> _getOrCreateSuffix() async {
     final prefs = await SharedPreferences.getInstance();
     String? suffix = prefs.getString(_suffixKey);
@@ -53,6 +59,7 @@ class DeviceNameService{
     }
     return suffix;
   }
+  // The suffix is generated from this place...
   static String _generateSuffix() {
     const character = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rand = Random();

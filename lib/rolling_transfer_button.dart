@@ -6,6 +6,7 @@ import 'package:file_share_app/features/file_transfer/views/transfer_progress_sc
 import 'package:file_share_app/main.dart';
 import 'package:flutter/material.dart';
 
+// This rolling transfer button allows a user to click on it to go back to their transfer prog. screen.
 class RollingTransferButton extends StatefulWidget{
 
   const RollingTransferButton({super.key,});
@@ -34,9 +35,11 @@ StreamSubscription<List<TransferItem>>? _sub;
     _sub?.cancel();
     super.dispose();
   }
+  // This is the part that check if transfer is going on.
   bool get _isTransferActive => 
      _transferItems.any((val) => val.status == TransferStatus.inProgress || val.status == TransferStatus.waiting);
 
+// Thid calculates transfer progress. I used fold to calculate the transfer bytes and all...
   double get _transferProgress {
     final activeTransfers = _transferItems.where((val) => val.status == TransferStatus.inProgress || val.status == TransferStatus.inProgress || val.status == TransferStatus.waiting,);
     if (activeTransfers.isEmpty) return 0;
@@ -47,6 +50,7 @@ StreamSubscription<List<TransferItem>>? _sub;
 
   @override
   Widget build(BuildContext context) {
+    // It checks for active and visible transfer then goes ahead witht he build.
     if (!_isTransferActive || TransferProgressScreen.isVisible) {
       return const SizedBox.shrink();
     }
@@ -75,6 +79,7 @@ StreamSubscription<List<TransferItem>>? _sub;
               )        
             ]
           ),
+          // I used a stack for the indicator and icon.
           child: Stack(
             alignment: Alignment.center,
             children: [

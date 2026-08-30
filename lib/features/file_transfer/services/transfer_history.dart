@@ -2,6 +2,7 @@ import 'package:file_share_app/features/file_transfer/models/transfer_item.dart'
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+// This service is responsible for keeping track of the transfer hist.
 class TransferHistoryService {
   TransferHistoryService._internal();
   static final TransferHistoryService instance = TransferHistoryService._internal();
@@ -9,6 +10,7 @@ class TransferHistoryService {
   Future<Database> get _db async {
     if (_database != null) return _database!;
     final path = join(await getDatabasesPath(), 'file_transfer_history.db');
+    // I am making use of open database here.
     _database = await openDatabase(
       path,
       version: 1,
@@ -31,6 +33,7 @@ class TransferHistoryService {
         return _database!;
       }
 
+// This records the history in the database.
       Future<void> recordSharing(TransferItem item) async {
         final db = await _db;
         await db.insert(
@@ -48,7 +51,7 @@ class TransferHistoryService {
           conflictAlgorithm : ConflictAlgorithm.replace,
         );
       }
-
+// Gets transfer history drom the database.
       Future<List<Map<String, dynamic>>> getAllTransferHistory() async {
         final db = await _db;
         return db.query('file_transfer_history', orderBy: 'timeStamp DESC');
