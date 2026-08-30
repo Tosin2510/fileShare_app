@@ -44,11 +44,11 @@ Right now, FileShare is **Android only**. iOS isn't supported yet, a lot of the 
 
 ## Getting started
 
-# Prerequisites
+## Prerequisites
 Flutter SDK installed and set up
 An Android device or emulator, two physical Android devices are recommended for actually testing transfers but an emulator can run the app, but you'll need a second real device (or a second emulator on the same network) to send/receive between
 
-# Setup
+## Setup
 
 1. Clone the repository:
    git clone https://github.com/Tosin2510/fileShare_app.git
@@ -60,7 +60,7 @@ An Android device or emulator, two physical Android devices are recommended for 
 4. Building a release APK
    flutter build apk --release
 
-# Testing It
+## Testing It
 Test it using preferaly two physical android devices, accept the permissions and carry on with transfer.
 
 
