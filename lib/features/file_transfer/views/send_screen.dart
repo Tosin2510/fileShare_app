@@ -40,7 +40,7 @@ class _SendScreenState extends State<SendScreen> {
         final unselected = mediaFiles.where(
           (val) => !selectedMediaFile.any((v) => v.id == val.id)
         ).toList();
-
+        
         final results = await Future.wait(unselected.map((mediaFiles) async {
           final fileInfo = await mediaFiles.file;
           final size = fileInfo != null ? await fileInfo.length() : 0;
@@ -164,18 +164,18 @@ class _SendScreenState extends State<SendScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SendSelectionButton(
-                      buttonRep: 'Media',
-                      icon: Icons.image,
+                      buttonRep: "Files", 
+                      icon: Icons.description_outlined,
                       containerSize: containerSize,
-                      isActive: selectedIconButton == 'Media',
+                      isActive: selectedIconButton == 'Files',
                       activeTabBackground: activeTabBackground,
                       inactiveTabBackground: inactiveTabBackground,
                       inactiveTabText: inactiveTabText,
                       onTap: () async {
                         setState(() {
-                          selectedIconButton = 'Media';
+                          selectedIconButton = 'Files';
                         });
-                        await _pickMediaFiles();
+                        await _pickFiles('Files');
                       },
                     ),
                     SendSelectionButton(
@@ -235,18 +235,18 @@ class _SendScreenState extends State<SendScreen> {
                       },
                     ),
                     SendSelectionButton(
-                      buttonRep: "Files", 
-                      icon: Icons.description_outlined,
+                      buttonRep: 'Media',
+                      icon: Icons.image,
                       containerSize: containerSize,
-                      isActive: selectedIconButton == 'Files',
+                      isActive: selectedIconButton == 'Media',
                       activeTabBackground: activeTabBackground,
                       inactiveTabBackground: inactiveTabBackground,
                       inactiveTabText: inactiveTabText,
                       onTap: () async {
                         setState(() {
-                          selectedIconButton = 'Files';
+                          selectedIconButton = 'Media';
                         });
-                        await _pickFiles('Files');
+                        await _pickMediaFiles();
                       },
                     ),
                   ],
