@@ -212,7 +212,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       statusLabel = 'Failed';
       statusColor = Colors.redAccent;
     } else if (!fileExists) {
-      statusLabel = 'File not found';
+      statusLabel = 'File can\'t be opened here, check your device.';
       statusColor = Colors.redAccent;
     }
     // cONFIRMS IF THE file is on the device still or not.
