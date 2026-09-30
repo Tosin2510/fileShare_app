@@ -9,7 +9,6 @@ class OutgoingFileConverter {
   static int _counter = 0;
   static String _nextId() => 'file_${DateTime.now().millisecondsSinceEpoch}_${_counter++}';
 
-  // This converts picked files(general files)
   static OutgoingFile fromPlatformFile(PlatformFile file) {
     final mimeType = lookupMimeType(file.name) ?? 'application/octet-stream';
     return OutgoingFile(
@@ -20,7 +19,6 @@ class OutgoingFileConverter {
       path: file.path!,
     );
   }
-  // Converts picked media files,
 
   static Future<OutgoingFile?> fromAssetEntity(AssetEntity asset) async {
     final File? file = await asset.file;
@@ -39,7 +37,6 @@ class OutgoingFileConverter {
       );
   }
 
-// This converts all file types.
 static Future<List<OutgoingFile>> convertAll({
   List<PlatformFile> platformFiles = const [],
   List<AssetEntity> mediaFiles = const [],

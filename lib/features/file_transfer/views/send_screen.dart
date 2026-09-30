@@ -10,7 +10,6 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
-// For sending files.
 class SendScreen extends StatefulWidget {
   const SendScreen({super.key});
 
@@ -26,11 +25,10 @@ class _SendScreenState extends State<SendScreen> {
   List<AssetEntity> selectedMediaFile = [];
   final List<int> _mediaByteSizes = [];
   bool _isLoading = false;
-  // Colors from my figma design.
   final Color activeTabBackground = const Color(0xFF258CF4);
   final Color inactiveTabBackground = const Color(0xFF1F1F1F);
   final Color inactiveTabText = const Color(0XFFFFFFFF);
-  // This is for the file picking logic.
+
   Future<void> _pickMediaFiles() async{
     if (_isLoading) return;
     setState(() => _isLoading = true);
@@ -67,7 +65,7 @@ class _SendScreenState extends State<SendScreen> {
       }
     }
   }
-  // For picking general files.
+
   Future<void>  _pickFiles(String fileCategory) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
@@ -99,7 +97,6 @@ class _SendScreenState extends State<SendScreen> {
     }
   }
 
-  // Clear cache when leaving to save user storage space.
   @override
   void dispose() {
     FilePicker.clearTemporaryFiles();                       
@@ -122,7 +119,6 @@ class _SendScreenState extends State<SendScreen> {
             children: [
               SizedBox(height: size.height * 0.025),
 
-              // Header: Back and Title
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -166,7 +162,7 @@ class _SendScreenState extends State<SendScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Buttons for selecting files, music and so on.
+
                     SendSelectionButton(
                       buttonRep: "Files", 
                       icon: Icons.description_outlined,
@@ -257,7 +253,6 @@ class _SendScreenState extends State<SendScreen> {
                 ),
               ),
 
-              // This section shows if files have been selected as well as the size of the selected files.
               if (selectedFile.isNotEmpty || selectedMediaFile.isNotEmpty)
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: size.height * 0.02),
@@ -265,7 +260,7 @@ class _SendScreenState extends State<SendScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        // Starts a counter at 0 and adds the size oif every file in the selected file list to get the size in Mb to 2 decimal places.
+
                         "${selectedFile.length + selectedMediaFile.length} Files • ${(_totalByteSize / (1024 * 1024)).toStringAsFixed(2)} MB",
                         style: TextStyle(
                           color: Colors.white70,
@@ -333,7 +328,7 @@ class _SendScreenState extends State<SendScreen> {
                             final mediaIndex = index - selectedFile.length;
                             final mediaFile = selectedMediaFile[mediaIndex];
                             displayName = mediaFile.title?? "Media File";
-                            itemSizeInBytes = _mediaByteSizes[mediaIndex].toDouble(); // Will be handled dynamically below
+                            itemSizeInBytes = _mediaByteSizes[mediaIndex].toDouble(); 
                             leadingIcon = mediaFile.type == AssetType.video
                             ? Icons.video_collection_rounded:
                             Icons.image_rounded;
@@ -358,7 +353,6 @@ class _SendScreenState extends State<SendScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        // This displays the file name
                                         displayName,
                                         style: TextStyle(
                                           color: Colors.white,
@@ -369,7 +363,7 @@ class _SendScreenState extends State<SendScreen> {
                                       ),
                                       if(itemSizeInBytes > 0)
                                       Text(
-                                        // This displays the file size. If the file size is greater than 1 Mb, it will display the size in Mb, otherwise, it will display in Kb to 2 decimal places.
+
                                         itemSizeInBytes > 1024 * 1024 
                                           ? "${(itemSizeInBytes / (1024 * 1024)).toStringAsFixed(2)} MB"
                                           : "${(itemSizeInBytes/ 1024).toStringAsFixed(2)} KB",
@@ -407,10 +401,10 @@ class _SendScreenState extends State<SendScreen> {
                 ),
                 if (selectedFile.isNotEmpty || selectedMediaFile.isNotEmpty)
                   Positioned(
-                    // Using a percentage of screen width for horizontal padding
+
                     left: MediaQuery.of(context).size.width * 0.04, 
                     right: MediaQuery.of(context).size.width * 0.04,
-                    // Using a percentage of height to stay consistently above the bottom nav
+                    
                     bottom: MediaQuery.of(context).padding.bottom + (MediaQuery.of(context).size.height * 0.02),                    
                     child: GestureDetector(
                       onTap: () {

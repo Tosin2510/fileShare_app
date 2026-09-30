@@ -8,9 +8,8 @@ class AppPickerScreen extends StatefulWidget{
   State<AppPickerScreen> createState() => _AppPickerScreenState();
 }
 class _AppPickerScreenState extends State<AppPickerScreen> {
-  // As soon as this screen opens, the list of installed apps is fetched and displayed.
-   List<AppInfo> _apps = []; // Holds all the installed apps on the device
-   final Map<String, String> _selectedApps = {}; // Holds the apps selected by the user.
+   List<AppInfo> _apps = []; 
+   final Map<String, String> _selectedApps = {};
    bool _isLoading = true;
    
    @override
@@ -27,8 +26,8 @@ class _AppPickerScreenState extends State<AppPickerScreen> {
     }
     );
    }
-   // If the user selects an app, it checks if the app is already in the list
-   // If it is there already, it removes it from the list. If it is not, it adds it.
+  
+
    void _controlSelection(AppInfo app) {
     setState(() {
       if(_selectedApps.containsKey(app.packageName)) {
@@ -49,7 +48,7 @@ class _AppPickerScreenState extends State<AppPickerScreen> {
         title: const Text("Select Apps", 
         style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
-        // This action button is visible at the right side of the app bar once the user selects an app.
+
         actions: [
           if(_selectedApps.isNotEmpty)
           TextButton(
@@ -66,7 +65,6 @@ class _AppPickerScreenState extends State<AppPickerScreen> {
       body: _isLoading
       ? const Center(child: CircularProgressIndicator())
 
-      // This part creates a list view that shows the installed applications on the device.
       : ListView.builder(
         itemCount: _apps.length,
         itemBuilder: (context, index) {

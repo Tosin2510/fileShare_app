@@ -3,10 +3,9 @@ import 'package:file_share_app/constants/app_constant.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-// The enum handles the varoious state the broadcasting service can be in.
 enum BroadcastState {idle, starting, broadcasting, stopping}
 class NetworkBroadcasting {
-  BonsoirBroadcast? _broadcast; // The bonsoir engine
+  BonsoirBroadcast? _broadcast;
   StreamSubscription<BonsoirBroadcastEvent>? _broadcastSubscription;
   BroadcastState _state = BroadcastState.idle;
   String? _lastError;
@@ -14,7 +13,6 @@ class NetworkBroadcasting {
   bool get isBroadcasting => _state == BroadcastState.broadcasting;
   String? get lastError => _lastError;
 
-// This is where the broadcasting starts, a device name is needed and a port where the shouting takes place.
   Future<void> startBroadcasting({required String deviceName}) async {
     if(state != BroadcastState.idle) return;
     _state = BroadcastState.starting;
@@ -29,7 +27,6 @@ class NetworkBroadcasting {
       }
     );
     try {
-      // Preparation for the broadcasting action, initialization of bonsoir engine and all.
       _broadcast = BonsoirBroadcast(service: service);
       await _broadcast!.initialize();
       _broadcastSubscription = _broadcast!.eventStream?.listen((event) {
@@ -39,7 +36,6 @@ class NetworkBroadcasting {
          await _handleFailure(error.toString());
       }
       );
-      // Broadcasting to other devices on the local network starts here.
       await _broadcast!.start();
       debugPrint('Broadcasting command started successfully');
     } catch(e) {
@@ -50,7 +46,6 @@ class NetworkBroadcasting {
     }
     }
 
-    // Stop the broadcaasting action/service.
   Future<void> stopBroadcasting() async {
     if (_state == BroadcastState.idle || _state == BroadcastState.stopping) return;
     _state = BroadcastState.stopping;
@@ -64,12 +59,11 @@ class NetworkBroadcasting {
       debugPrint('Error Stopping Broadcast $e');
     } finally {
       _broadcast = null;
-      _state = BroadcastState.idle; // Reset back to idle always at the end of broadcasting.
+      _state = BroadcastState.idle; 
       debugPrint('Broadcast state reset to idle');
     }
   }
 
-// Change the state of the app based on broadcasting actions or even events.
   void _handleBroadcastEvent(BonsoirBroadcastEvent event) {
     if (_state == BroadcastState.idle || _state == BroadcastState.stopping) return;
     switch(event) {
@@ -83,7 +77,6 @@ class NetworkBroadcasting {
        break;
     }
   }
-  // Handle cases when the broadcasting process fails.
   Future<void> _handleFailure(String errorMessage) async {
     _lastError = errorMessage;
     await _broadcastSubscription?.cancel();

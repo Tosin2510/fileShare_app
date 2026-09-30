@@ -18,12 +18,9 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   @override
   void initState() {
     super.initState();
-    // This initialize the initial index for the nav.bar
     _currentIndex = widget.initialIndex;
   }
 
-  // A list of all the screens corresponding to each tab
-  // I have created these screen in differeny files.
   final List<Widget> _screens = [
     const SendScreen(),
     const ReceiveScreen(),
@@ -32,7 +29,6 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   ];
 
   @override
-  // The build part.
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
 
@@ -43,15 +39,14 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
         height: MediaQuery.of(context).size.height * 0.09,
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         decoration: const BoxDecoration(
-          color: Color(0xFF000000), // Pure Black Figma Match
+          color: Color(0xFF000000), 
           border: Border(
-            top: BorderSide(color: Color(0xFF2C2C2C), width: 1), // Figma Stroke Match
+            top: BorderSide(color: Color(0xFF2C2C2C), width: 1), 
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // For each of the tabs, the navigation property...
             _buildNavigTab("Send", Icons.send_rounded, 0, screenWidth),
             _buildNavigTab("Receive", Icons.download_rounded, 1, screenWidth),
             _buildNavigTab("History", Icons.history_rounded, 2, screenWidth),
@@ -62,8 +57,8 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
     );
   }
 
-// I created this function to show the active and inactive tabs
-// The colour of the icon and text change depending on the state of the tab(whether active or not).
+
+// The colour of the icon and text change depending on the state of the tab.
   Widget _buildNavigTab(String title, IconData icon, int index, double sw) {
     final bool isActive = _currentIndex == index;
 

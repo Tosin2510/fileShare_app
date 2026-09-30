@@ -1,6 +1,6 @@
 import 'package:bonsoir/bonsoir.dart';
 import 'package:flutter/material.dart';
-// Device tile for available device on the local network.
+
 class BuildDeviceTile extends StatelessWidget{
   final BonsoirService device;
   final double containerSize;
@@ -16,7 +16,7 @@ class BuildDeviceTile extends StatelessWidget{
     required this.onTap
 
   });
-  // Depending on the platorm, the icon will change.
+
   IconData _deviceIcon(String platform) {
     switch(platform.toLowerCase()) {
       case 'android':
@@ -28,7 +28,6 @@ class BuildDeviceTile extends StatelessWidget{
     }
   }
   @override
-  // The build...
   Widget build(BuildContext context) {
     final String platform = device.attributes['platform']?.toUpperCase() ?? 'UNKNOWN';
     final String version = device.attributes['version'] ?? '';

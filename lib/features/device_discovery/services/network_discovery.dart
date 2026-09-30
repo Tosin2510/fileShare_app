@@ -4,16 +4,14 @@ import 'package:bonsoir/bonsoir.dart';
 import 'package:file_share_app/constants/app_constant.dart';
 import 'package:flutter/material.dart';
 
-// Handles the various state of the discovery process.
 enum DiscoveryState {idle, starting, stopping, scanning}
-// This class handles the discovery of broadcasted devices on the local network.
 class NetworkDiscovery {
   BonsoirDiscovery? _discovery;
   StreamSubscription<BonsoirDiscoveryEvent>? _discoverySubscription;
   DiscoveryState _state = DiscoveryState.idle;
   final List<BonsoirService> discoveredDevices = [];
   List<String> _selfIps = [];
-  Timer? _livenessCheckTimer; // I added a liveness timer to be able to track if the discovered devices can stil be reached.
+  Timer? _livenessCheckTimer; 
 
   final StreamController<List<BonsoirService>> _deviceController = 
   StreamController<List<BonsoirService>>.broadcast();
@@ -120,16 +118,12 @@ class NetworkDiscovery {
     switch(event) {
       case BonsoirDiscoveryServiceFoundEvent():
       if(_discovery == null) return;
-       debugPrint('Service found: ${event.service.name}. Resolving...');
-       //Forces Bonsoir to fetch the IP address and Port, should be called when the user wants to connect to this service.
        event.service.resolve(_discovery!.serviceResolver);
        break;
       case BonsoirDiscoveryServiceResolvedEvent():
       final resolvedIp = event.service.hostAddress;
-      debugPrint('==SELF CHECK === resolvedIp: $resolvedIp | selfIps: $_selfIps');
       if (resolvedIp != null && _selfIps.contains(resolvedIp)) return;
-       // The service is fully resolved with host and port, ready for connection!
-       // Clear any old unresolved copies of this device name before adding the fresh one
+       
        discoveredDevices.removeWhere((device) => device.name == event.service.name);
        discoveredDevices.add(event.service);
        if (!_deviceController.isClosed) {

@@ -15,24 +15,22 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 
-enum ServerState { stopped, starting, running} // Tracks the status of the server. 
+enum ServerState { stopped, starting, running} 
 class ReceiveServer{
   ReceiveServer._internal();
   static final ReceiveServer instance = ReceiveServer._internal();
   final _multicastLock = FlutterMulticastLock();
   HttpServer? _server; // This is the engine that is running the network port.
   ServerState _state = ServerState.stopped;
-  ServerState get state => _state; // This is the getter the UI will use to check if the server is running.
+  ServerState get state => _state; 
   bool get isRunning => _state == ServerState.running;
-  final Map<String, IncomingSession> _sessions = {}; // Maps sessions to their unique sessionID.
+  final Map<String, IncomingSession> _sessions = {}; 
   final Map<String, Completer<bool>> _decisionCompleters = {};
 
-  // Broadcasts live updates(incoming session requests) from the network servers to the UI.
   final StreamController<IncomingSession> _sessionController =
      StreamController<IncomingSession>.broadcast();
   Stream<IncomingSession> get incomingSessionStream => _sessionController.stream;
 
-  // This is basically for completed file transfers.
   final StreamController<String> _fileReceivedController = 
     StreamController<String>.broadcast();
   Stream<String> get fileReceivedStream => _fileReceivedController.stream;
@@ -42,36 +40,29 @@ class ReceiveServer{
     if(state != ServerState.stopped) return;
     _state = ServerState.starting;
     final router = Router();
-    // The sending device annnounces the incoming files
     router.post('/prepare', _handlePrepare);
-    // The device does the streaming of the actual file bytes.
     router.post('/upload', _handleUpload);
+
     try {
-      // This basically opens the server to the world.
       _server = await shelf_io.serve(
         router.call,
-        '0.0.0.0', // This allows the device to listen to any connection on the local network and not just from that device.
+        '0.0.0.0',
         AppConstant.transferPort,
       );
       _state = ServerState.running;
-      debugPrint('Receive server running on port ${AppConstant.transferPort}');
     } catch (e) {
       _state = ServerState.stopped;
-      debugPrint('Failed to start receiver server $e');
     }
   }
-  // This function handles the handshake between both devices.
-  // It basically takes an incoming https request and promises to return an https response.
+  
   Future<Response> _handlePrepare(Request request) async {
   try{
     final String body = await request.readAsString();
     final Map<String, dynamic> json = jsonDecode(body);
-    // Parsing the transfer session.
     final String sessionId = json['sessionId'] as String;
     final String senderName = json['deviceName'] as String;
     final List<dynamic> filesJson = json['files'] as List<dynamic>;
-    // Iterates through the filesJson array, performs type casting as a type
-    // Passes it into a factory constructor.
+   
     final List<IncomingFile> files = filesJson.
       map((a) => IncomingFile.fromJson(a as Map<String, dynamic>))
       .toList();
@@ -122,7 +113,6 @@ class ReceiveServer{
   }
 }
 
-// Used by the UI to reply to incoming sessions.
 void respondToSession(String sessionId, bool accepted) {
   final completer = _decisionCompleters[sessionId];
   if (completer != null && !completer.isCompleted) {
@@ -130,7 +120,6 @@ void respondToSession(String sessionId, bool accepted) {
   }
 }
 
-// This part handles the file bytes being sent.
 Future<Response> _handleUpload(Request request) async {
   try{
     final String? sessionId = request.url.queryParameters['sessionId'];
@@ -148,7 +137,6 @@ Future<Response> _handleUpload(Request request) async {
         body: jsonEncode({'error': 'Session not found'}),
         );
     }
-    // Checks for valid files in a transfer session.
     final IncomingFile? incomingFile = session.files
      .where((a) => a.fileId == fileId)
      .firstOrNull;
@@ -157,7 +145,7 @@ Future<Response> _handleUpload(Request request) async {
         body: jsonEncode({'error': 'File not found in session'}) 
         );
      }
-     // Saves incoming file temporarily.
+
      final Directory tempDir = await getTemporaryDirectory();
      final String tempDirPath = '${tempDir.path}/${incomingFile.name}';
 
@@ -176,7 +164,6 @@ Future<Response> _handleUpload(Request request) async {
 
      String finalPath = tempDirPath;
 
-// Save based on mime Type.
      if (incomingFile.mimeType.startsWith('video/') || incomingFile.mimeType.startsWith('image/')) {
       _saveMediaFiles(tempDirPath, incomingFile.mimeType);
      } else {
@@ -202,8 +189,6 @@ Future<Response> _handleUpload(Request request) async {
   }
 }
 
-// Handles saving of media files to gallery.
-// I am using gal.
 Future<void> _saveMediaFiles(String filePath, String mimeType) async {
   try{
     if (mimeType.startsWith('image/')) {
@@ -230,7 +215,6 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
      }
     }
 
-// For general files, i am using media store.
     final MediaStore _mediaStore = MediaStore();
     Future<SaveInfo?> _saveGeneralFileAndReturnInfo(String tempFilePath, String fileName, String mimeType) async {
       try {
@@ -255,7 +239,6 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
       }
     }
 
-// Stops the server.
 Future<void> stop() async {
   await _server?.close(force: true);
   _server = null;
@@ -269,7 +252,6 @@ Future<void> dispose() async {
   for (final c in _decisionCompleters.values) {
     if (!c.isCompleted) c.complete(false);
   }
-  // Clears and closes all the transfer stream...
   _decisionCompleters.clear();
   await _sessionController.close();
   await _fileReceivedController.close();

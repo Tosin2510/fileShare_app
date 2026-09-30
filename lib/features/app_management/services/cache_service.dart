@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-// This class service takes care of clearing and mgmt of the app cache...
 class CacheService {
   static Future<int> getCacheSizeInBytes() async {
     final cacheDir = await getTemporaryDirectory();
@@ -21,7 +20,6 @@ class CacheService {
   return totalSize;
 }
 
-// This is the part responsible for clearing the app cache data.
 static Future<void> clearCache() async {
   final cacheDir = await getTemporaryDirectory();
   if (await cacheDir.exists()) {

@@ -8,7 +8,6 @@ import 'package:file_share_app/shared/widgets/radar_pulse_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// The receive Screen
 class ReceiveScreen extends StatefulWidget {
   const ReceiveScreen({super.key});
 
@@ -26,7 +25,6 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
     });
   }
 
-// This function brings up a box and asks the user if they accept the incoming files.
   void _showIncomingDialog(IncomingSession session) {
     final totalSize = session.files.fold<int>(0, (sum, f) => sum + f.size);
     showDialog(
@@ -148,7 +146,6 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              // show the device name.
                               'Visible as "${snapshot.data}"',
                               style: const TextStyle(
                                 color: Colors.white54,

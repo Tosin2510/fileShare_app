@@ -35,8 +35,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       navigatorKey: rootNavigatorKey,
       title: 'FileShare',
-      theme: ThemeData(useMaterial3: true),
-      home: const AppRoot(),
+      theme: ThemeData.dark(useMaterial3: true).copyWith(
+        scaffoldBackgroundColor: const Color(0xFF1E1E24), // Or Colors.black
+        canvasColor: const Color(0xFF1E1E24),
+        colorScheme: const ColorScheme.dark(
+          surface: Color(0xFF1E1E24),
+        ),
+      ),      home: const AppRoot(),
       builder: (context, child) {
         return Stack(
           children: [

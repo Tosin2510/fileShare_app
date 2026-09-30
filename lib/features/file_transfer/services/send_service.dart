@@ -8,16 +8,12 @@ import 'package:file_share_app/features/file_transfer/services/outgoing_file.dar
 import 'package:file_share_app/features/file_transfer/services/transfer_tracker.dart';
 import 'package:flutter/foundation.dart';
 
-// The send service which is responsible for
-// Sending to other devices.
+
 enum SendResult {accepted, declined, failed}
 class SendService {
-  // I am using dio because it has a progress calback...
   final Dio _dio = Dio();
 
-  // This function sends file batch to the target Ip 
-  //it then returns the result of the handshake/connection.
-  // The receiving device must accept before file bytes are shared.
+  
 
   Future<SendResult> sendFiles({
     required String targetIp,
@@ -43,7 +39,6 @@ class SendService {
     }
 
     try {
-      // This part is the handshake between both device. It blocks on the receiving device end until they either accept or reject.
       final prepareResponse = await _dio.post(
         '$baseUrl/prepare',
         data: {
@@ -64,7 +59,6 @@ class SendService {
         }
         return SendResult.declined;
       }
-      // This is for uploading each file bytes
       for (final file in files) {
         final fileOnDisk = File(file.path);
         if (!await fileOnDisk.exists()) {
@@ -78,7 +72,6 @@ class SendService {
             'sessionId': sessionId,
             'fileId': file.fileId,
           },
-          // the file on disk is read and sent to receiving device.
           data: fileOnDisk.openRead(),
           options: Options(
             headers: {
@@ -94,7 +87,7 @@ class SendService {
             );
           }
         );
-        TransferTracker.instance.markDone(file.fileId); // The end of the transfer process.
+        TransferTracker.instance.markDone(file.fileId); 
       }
       return SendResult.accepted;
     } on DioException catch(e) {

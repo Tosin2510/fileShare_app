@@ -7,7 +7,6 @@ class DeviceNameService{
   static const _suffixKey = 'device_suffix';
   static const _customDeviceNameKey = 'custom_device_name';
 
-// This part is responsible for getting the name of the device.
   static Future<String> getDeviceName() async {
     final prefs = await SharedPreferences.getInstance();
     final customName = prefs.getString(_customDeviceNameKey);
@@ -17,7 +16,6 @@ class DeviceNameService{
     return '$baseName ($suffix)';
   }
 
-// This basically allows users to set their preferred name for their device.
   static Future<void> setCustomDeviceName(String? name) async {
     final prefs = await SharedPreferences.getInstance();
     if (name == null || name.trim().isEmpty) {
@@ -27,7 +25,6 @@ class DeviceNameService{
     }
   }
 
-// The custom device name set by the user is got here.
   static Future<String?> getCustomDeviceName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_customDeviceNameKey);
@@ -43,7 +40,7 @@ class DeviceNameService{
         return info.name;
       }
     } catch(e) {
-      // Fall back option
+      return 'Unknown Device';
     }
     return 'Unknown Device';
   }
@@ -59,7 +56,6 @@ class DeviceNameService{
     }
     return suffix;
   }
-  // The suffix is generated from this place...
   static String _generateSuffix() {
     const character = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rand = Random();
