@@ -4,32 +4,32 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DeviceNameService{
-  static const _suffixKey = 'device_suffix';
-  static const _customDeviceNameKey = 'custom_device_name';
+  static const suffixKey = 'device_suffix';
+  static const customDeviceNameKey = 'custom_device_name';
 
   static Future<String> getDeviceName() async {
     final prefs = await SharedPreferences.getInstance();
-    final customName = prefs.getString(_customDeviceNameKey);
+    final customName = prefs.getString(customDeviceNameKey);
     if (customName != null && customName.trim().isNotEmpty) return customName;
-    final baseName = await _getBaseName();
-    final suffix = await _getOrCreateSuffix();
+    final baseName = await getBaseName();
+    final suffix = await getOrCreateSuffix();
     return '$baseName ($suffix)';
   }
 
   static Future<void> setCustomDeviceName(String? name) async {
     final prefs = await SharedPreferences.getInstance();
     if (name == null || name.trim().isEmpty) {
-      await prefs.remove(_customDeviceNameKey);
+      await prefs.remove(customDeviceNameKey);
     } else {
-      await prefs.setString(_customDeviceNameKey, name.trim());
+      await prefs.setString(customDeviceNameKey, name.trim());
     }
   }
 
   static Future<String?> getCustomDeviceName() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_customDeviceNameKey);
+    return prefs.getString(customDeviceNameKey);
   }
-  static Future<String> _getBaseName() async {
+  static Future<String> getBaseName() async {
     final deviceInfo = DeviceInfoPlugin();
     try{
       if (Platform.isAndroid) {
@@ -47,16 +47,16 @@ class DeviceNameService{
 
   // I actually added this function so that no two device with the same device name can be seen the same way in the device list.
   // If two or more device have the same name, random suffix is added to the end of the device name.
-  static Future<String> _getOrCreateSuffix() async {
+  static Future<String> getOrCreateSuffix() async {
     final prefs = await SharedPreferences.getInstance();
-    String? suffix = prefs.getString(_suffixKey);
+    String? suffix = prefs.getString(suffixKey);
     if (suffix == null) {
-      suffix = _generateSuffix();
-      await prefs.setString(_suffixKey, suffix);
+      suffix = generateSuffix();
+      await prefs.setString(suffixKey, suffix);
     }
     return suffix;
   }
-  static String _generateSuffix() {
+  static String generateSuffix() {
     const character = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rand = Random();
     return List.generate(4, (_) => character[rand.nextInt(character.length)]).join();

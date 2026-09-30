@@ -5,8 +5,8 @@ import 'dart:async';
 
 enum BroadcastState {idle, starting, broadcasting, stopping}
 class NetworkBroadcasting {
-  BonsoirBroadcast? _broadcast;
-  StreamSubscription<BonsoirBroadcastEvent>? _broadcastSubscription;
+  BonsoirBroadcast? broadcast;
+  StreamSubscription<BonsoirBroadcastEvent>? broadcastSubscription;
   BroadcastState _state = BroadcastState.idle;
   String? _lastError;
   BroadcastState get state => _state;
@@ -27,21 +27,21 @@ class NetworkBroadcasting {
       }
     );
     try {
-      _broadcast = BonsoirBroadcast(service: service);
-      await _broadcast!.initialize();
-      _broadcastSubscription = _broadcast!.eventStream?.listen((event) {
-        _handleBroadcastEvent(event);
+      broadcast = BonsoirBroadcast(service: service);
+      await broadcast!.initialize();
+      broadcastSubscription = broadcast!.eventStream?.listen((event) {
+        handleBroadcastEvent(event);
       }, onError: (error) async {
          debugPrint('Stream Broadcasting Error $error');
-         await _handleFailure(error.toString());
+         await handleFailure(error.toString());
       }
       );
-      await _broadcast!.start();
+      await broadcast!.start();
       debugPrint('Broadcasting command started successfully');
     } catch(e) {
       debugPrint('Broadcasting failed completely during initialization');
       if(_state!=BroadcastState.idle) {
-        await _handleFailure(e.toString());
+        await handleFailure(e.toString());
       }
     }
     }
@@ -50,21 +50,21 @@ class NetworkBroadcasting {
     if (_state == BroadcastState.idle || _state == BroadcastState.stopping) return;
     _state = BroadcastState.stopping;
     try{
-      await _broadcastSubscription?.cancel();
-      _broadcastSubscription = null;
-      if(_broadcast !=null) {
-        await _broadcast!.stop();
+      await broadcastSubscription?.cancel();
+      broadcastSubscription = null;
+      if(broadcast !=null) {
+        await broadcast!.stop();
       }
     } catch(e) {
       debugPrint('Error Stopping Broadcast $e');
     } finally {
-      _broadcast = null;
+      broadcast = null;
       _state = BroadcastState.idle; 
       debugPrint('Broadcast state reset to idle');
     }
   }
 
-  void _handleBroadcastEvent(BonsoirBroadcastEvent event) {
+  void handleBroadcastEvent(BonsoirBroadcastEvent event) {
     if (_state == BroadcastState.idle || _state == BroadcastState.stopping) return;
     switch(event) {
       case BonsoirBroadcastStartedEvent():
@@ -77,11 +77,11 @@ class NetworkBroadcasting {
        break;
     }
   }
-  Future<void> _handleFailure(String errorMessage) async {
+  Future<void> handleFailure(String errorMessage) async {
     _lastError = errorMessage;
-    await _broadcastSubscription?.cancel();
-    _broadcastSubscription = null;
-    _broadcast = null;
+    await broadcastSubscription?.cancel();
+    broadcastSubscription = null;
+    broadcast = null;
     _state = BroadcastState.idle;
   }
   Future<void> dispose() async {

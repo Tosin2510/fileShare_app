@@ -28,25 +28,25 @@ class DeviceListScreen extends StatefulWidget {
 }
 
 class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerProviderStateMixin {
-  final NetworkDiscovery _networkDiscovery = NetworkDiscovery();
-  List<BonsoirService> _devices = [];
-  StreamSubscription<List<BonsoirService>>? _deviceSubscription;
-  late AnimationController _refreshAnimation;
-  bool _isRefreshing = false;
-  final Color _subtleText = const Color(0xFCCCCCCC);
-  final SendService _sendService = SendService();
-  bool _isSending = false;
+  final NetworkDiscovery networkDiscovery = NetworkDiscovery();
+  List<BonsoirService> devices = [];
+  StreamSubscription<List<BonsoirService>>? deviceSubscription;
+  late AnimationController refreshAnimation;
+  bool isRefreshing = false;
+  final Color subtleText = const Color(0xFCCCCCCC);
+  final SendService sendService = SendService();
+  bool isSending = false;
 
   Future<void> _startScanning() async {
-    _deviceSubscription = _networkDiscovery.deviceStream.listen((devices){
-      if(mounted) setState(() => _devices = devices);
+    deviceSubscription = networkDiscovery.deviceStream.listen((devices){
+      if(mounted) setState(() => devices = devices);
     });
-    await _networkDiscovery.startScanning();
+    await networkDiscovery.startScanning();
     if(mounted) setState(() {});
   }
   @override
   void initState() {
-    _refreshAnimation = AnimationController(
+    refreshAnimation = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
@@ -55,23 +55,23 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
   }
   @override
   void dispose() { 
-    _refreshAnimation.dispose();
-    _deviceSubscription?.cancel();
-    _networkDiscovery.dispose();
+    refreshAnimation.dispose();
+    deviceSubscription?.cancel();
+    networkDiscovery.dispose();
     super.dispose();
   }
   Future<void> _refresh() async {
-    if(_isRefreshing) return;
-    setState(() => _isRefreshing = true);
-    _refreshAnimation.repeat(reverse: true); 
-    setState(() => _devices = []);
-    await _networkDiscovery.stopScanning();
+    if(isRefreshing) return;
+    setState(() => isRefreshing = true);
+    refreshAnimation.repeat(reverse: true); 
+    setState(() => devices = []);
+    await networkDiscovery.stopScanning();
     await _startScanning();
     await Future.delayed(const Duration(seconds: 3));
     if(mounted) {
-      _refreshAnimation.stop();
-      _refreshAnimation.reset();
-      if(mounted) setState(() => _isRefreshing = false);
+      refreshAnimation.stop();
+      refreshAnimation.reset();
+      if(mounted) setState(() => isRefreshing = false);
     }
   }
 
@@ -81,8 +81,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
       debugPrint('No Ip address found for ${device.name}');
       return;
     }
-    if (_isSending) return;
-    setState(() => _isSending = true
+    if (isSending) return;
+    setState(() => isSending = true
     );
     try {
     final outgoingFiles = await OutgoingFileConverter.convertAll(
@@ -91,7 +91,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     );
     if (outgoingFiles.isEmpty) {
       if (mounted) {
-        setState(() => _isSending = false
+        setState(() => isSending = false
         );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -110,14 +110,14 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
     )
    );
 
-    final result = await _sendService.sendFiles(
+    final result = await  sendService.sendFiles(
       targetIp: ip, 
       senderDeviceName: senderName, 
       files: outgoingFiles
       );
 
       if (!mounted) return;
-      setState(() => _isSending = false);
+      setState(() => isSending = false);
 
       switch (result) {
         case SendResult.accepted:
@@ -141,7 +141,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
       }
   } catch(e, stack) {
     debugPrint('$stack');
-    if (mounted) setState(() => _isSending = false);
+    if (mounted) setState(() => isSending = false);
   }
 }
 
@@ -149,7 +149,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final containerSize = size.width * 0.6;
-    final bool isScanning = _networkDiscovery.isScanning;
+    final bool isScanning = networkDiscovery.isScanning;
     return Padding(
           padding: EdgeInsets.symmetric(horizontal: size.width * 0.06),
           child: Column(
@@ -187,16 +187,16 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          if(_isRefreshing)
+                          if(isRefreshing)
                           CircularProgressIndicator(
                             strokeWidth: 2,
                             color: const Color(0xFF258CFA).withValues(alpha: 0.4),
                           ),
                           RotationTransition(
-                            turns: _refreshAnimation,
+                            turns: refreshAnimation,
                             child: Icon(
                               Icons.refresh_rounded,
-                              color: _isRefreshing ? const Color(0xFF258CFA): Colors.white54,
+                              color: isRefreshing ? const Color(0xFF258CFA): Colors.white54,
                               size: containerSize * 0.1,
                             )
                             )
@@ -209,7 +209,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
               Text(
                 'Devices with the app opened will appear here.',
                 style: TextStyle(
-                  color: _subtleText,
+                  color: subtleText,
                   fontSize: containerSize * 0.075,
                   fontWeight: FontWeight.w400,
                 )
@@ -218,17 +218,17 @@ class _DeviceListScreenState extends State<DeviceListScreen> with SingleTickerPr
 
                 SizedBox(
                   height: size.height * 0.45,
-                  child: _devices.isEmpty
+                  child: devices.isEmpty
                   ? BuildEmptyState(
                     containerSize: containerSize, 
                     isScanning: isScanning,                    
                   )
                   : ListView.separated(
-                    itemCount: _devices.length,
+                    itemCount: devices.length,
                     separatorBuilder: (_, _) =>
                        SizedBox(height: containerSize*0.04),
                     itemBuilder: (context, index) {
-                      final device = _devices[index];
+                      final device = devices[index];
                       return BuildDeviceTile(
                         containerSize: containerSize,
                         device: device,

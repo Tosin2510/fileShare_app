@@ -15,17 +15,17 @@ class ReceiveScreen extends StatefulWidget {
   State<ReceiveScreen> createState() => _ReceiveScreenState();
 }
 class _ReceiveScreenState extends State<ReceiveScreen> {
-  StreamSubscription<IncomingSession>? _sessionSubscription;
+  StreamSubscription<IncomingSession>? sessionSubscription;
 
   @override
   void initState() {
     super.initState();
-    _sessionSubscription = ReceiveServer.instance.incomingSessionStream.listen((session) {
-      _showIncomingDialog(session);
+    sessionSubscription = ReceiveServer.instance.incomingSessionStream.listen((session) {
+      showIncomingDialog(session);
     });
   }
 
-  void _showIncomingDialog(IncomingSession session) {
+  void showIncomingDialog(IncomingSession session) {
     final totalSize = session.files.fold<int>(0, (sum, f) => sum + f.size);
     showDialog(
       context: context,
@@ -77,12 +77,11 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
 
   @override
   void dispose() {
-    _sessionSubscription?.cancel();
+    sessionSubscription?.cancel();
     super.dispose();
   }
 
   @override
-  // The build.
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final containerSize = (size.width * 0.5).clamp(150.0, 250.0);

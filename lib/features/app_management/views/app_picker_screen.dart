@@ -8,33 +8,33 @@ class AppPickerScreen extends StatefulWidget{
   State<AppPickerScreen> createState() => _AppPickerScreenState();
 }
 class _AppPickerScreenState extends State<AppPickerScreen> {
-   List<AppInfo> _apps = []; 
-   final Map<String, String> _selectedApps = {};
-   bool _isLoading = true;
+   List<AppInfo> apps = []; 
+   final Map<String, String> selectedApps = {};
+   bool isLoading = true;
    
    @override
    void initState() {
     super.initState();
-    _loadApps();
+    loadApps();
    }
-   Future<void> _loadApps() async {
+   Future<void> loadApps() async {
     final apps = await AppPickerService.getInstalledApps();
     if(!mounted) return;
     setState(() {
-      _apps = apps;
-      _isLoading = false;
+      this.apps = apps;
+      isLoading = false;
     }
     );
    }
   
 
-   void _controlSelection(AppInfo app) {
+   void controlSelection(AppInfo app) {
     setState(() {
-      if(_selectedApps.containsKey(app.packageName)) {
-        _selectedApps.remove(app.packageName);
+      if(selectedApps.containsKey(app.packageName)) {
+        selectedApps.remove(app.packageName);
       }
       else{
-        _selectedApps[app.packageName] = app.name;
+        selectedApps[app.packageName] = app.name;
       }
     });
    }
@@ -50,26 +50,26 @@ class _AppPickerScreenState extends State<AppPickerScreen> {
         iconTheme: const IconThemeData(color: Colors.white),
 
         actions: [
-          if(_selectedApps.isNotEmpty)
+          if(selectedApps.isNotEmpty)
           TextButton(
             onPressed: () {
-              Navigator.pop(context, _selectedApps);
+              Navigator.pop(context, selectedApps);
             },
             child: Text(
-              "Select ${_selectedApps.length}",
+              "Select ${selectedApps.length}",
               style: const TextStyle(color: Color(0xFF258CF4))
             )
             )
         ],
       ),
-      body: _isLoading
+      body: isLoading
       ? const Center(child: CircularProgressIndicator())
 
       : ListView.builder(
-        itemCount: _apps.length,
+        itemCount: apps.length,
         itemBuilder: (context, index) {
-          final app = _apps[index];
-          final isSelected = _selectedApps.containsKey(app.packageName);
+          final app = apps[index];
+          final isSelected = selectedApps.containsKey(app.packageName);
           return ListTile(
             leading: FutureBuilder<AppInfo?>(
               future: InstalledApps.getAppInfo(app.packageName),
@@ -97,7 +97,7 @@ class _AppPickerScreenState extends State<AppPickerScreen> {
               trailing: isSelected
               ? const Icon(Icons.check_circle, color: Color(0xFF258CFA))
               : const Icon(Icons. circle_outlined, color: Colors.grey),
-              onTap: () => _controlSelection(app),
+              onTap: () => controlSelection(app),
             );
         }
             )   

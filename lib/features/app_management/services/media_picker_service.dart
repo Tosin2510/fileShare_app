@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class MediaPickerService{
-  final PermissionService _permissionService = PermissionService();
+  final PermissionService permissionService = PermissionService();
   Future<List<AssetEntity>?> pickMediaFiles(BuildContext context) async { 
   try{
-    final bool hasAccess = await _permissionService.requestMediaPermission();
+    final bool hasAccess = await permissionService.requestMediaPermission();
     if(!hasAccess) return null;
     if(!context.mounted) return null;
     final List<AssetEntity>? result = await AssetPicker.pickAssets(

@@ -13,12 +13,12 @@ class CustomBottomNavBar extends StatefulWidget {
 }
 
 class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
-  late int _currentIndex;
+  late int currentIndex;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
+    currentIndex = widget.initialIndex;
   }
 
   final List<Widget> _screens = [
@@ -34,7 +34,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
-      body: _screens[_currentIndex],
+      body: _screens[currentIndex],
       bottomNavigationBar: Container(
         height: MediaQuery.of(context).size.height * 0.09,
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -47,10 +47,10 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavigTab("Send", Icons.send_rounded, 0, screenWidth),
-            _buildNavigTab("Receive", Icons.download_rounded, 1, screenWidth),
-            _buildNavigTab("History", Icons.history_rounded, 2, screenWidth),
-            _buildNavigTab("Settings", Icons.settings_rounded, 3, screenWidth),
+            buildNavigTab("Send", Icons.send_rounded, 0, screenWidth),
+            buildNavigTab("Receive", Icons.download_rounded, 1, screenWidth),
+            buildNavigTab("History", Icons.history_rounded, 2, screenWidth),
+            buildNavigTab("Settings", Icons.settings_rounded, 3, screenWidth),
           ],
         ),
       ),
@@ -59,11 +59,11 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
 
 // The colour of the icon and text change depending on the state of the tab.
-  Widget _buildNavigTab(String title, IconData icon, int index, double sw) {
-    final bool isActive = _currentIndex == index;
+  Widget buildNavigTab(String title, IconData icon, int index, double sw) {
+    final bool isActive = currentIndex == index;
 
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () => setState(() => currentIndex = index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: sw / 4,

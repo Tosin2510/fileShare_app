@@ -18,22 +18,22 @@ class SendScreen extends StatefulWidget {
 }
 
 class _SendScreenState extends State<SendScreen> {
-  int _totalByteSize = 0;
+  int totalByteSize = 0;
   String selectedIconButton = 'Images';
   List<PlatformFile> selectedFile = [];
-  final MediaPickerService _mediaPickerService = MediaPickerService();
+  final MediaPickerService mediaPickerService = MediaPickerService();
   List<AssetEntity> selectedMediaFile = [];
-  final List<int> _mediaByteSizes = [];
-  bool _isLoading = false;
+  final List<int> mediaByteSizes = [];
+  bool isLoading = false;
   final Color activeTabBackground = const Color(0xFF258CF4);
   final Color inactiveTabBackground = const Color(0xFF1F1F1F);
   final Color inactiveTabText = const Color(0XFFFFFFFF);
 
-  Future<void> _pickMediaFiles() async{
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
+  Future<void> pickMediaFiles() async{
+    if (isLoading) return;
+    setState(() => isLoading = true);
     try{
-      final List<AssetEntity>? mediaFiles = await _mediaPickerService.pickMediaFiles(context);
+      final List<AssetEntity>? mediaFiles = await mediaPickerService.pickMediaFiles(context);
       if(!mounted) return;
       if (mediaFiles != null && mediaFiles.isNotEmpty) {
         final unselected = mediaFiles.where(
@@ -50,8 +50,8 @@ class _SendScreenState extends State<SendScreen> {
         setState(() {
           for (final entry in results) {
             selectedMediaFile.add(entry.key);
-            _mediaByteSizes.add(entry.value);
-            _totalByteSize += entry.value;
+            mediaByteSizes.add(entry.value);
+            totalByteSize += entry.value;
           }
         });
       }
@@ -60,15 +60,15 @@ class _SendScreenState extends State<SendScreen> {
     } finally{
       if(mounted) {
         setState(() {
-          _isLoading = false;
+          isLoading = false;
         });
       }
     }
   }
 
-  Future<void>  _pickFiles(String fileCategory) async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
+  Future<void>  pickFiles(String fileCategory) async {
+    if (isLoading) return;
+    setState(() => isLoading = true);
     try{
       final List<PlatformFile> files = await FilePickerService.pickFiles(fileCategory);
       if(!mounted) return;
@@ -85,14 +85,14 @@ class _SendScreenState extends State<SendScreen> {
         if (!mounted) return;
         setState(() {
           selectedFile.addAll(newFiles);
-          _totalByteSize += addedBytes;
+          totalByteSize += addedBytes;
         });
       }
     } catch(e) {
       debugPrint("Error handling general file selection");
     } finally{
       if(mounted) {
-        setState(() => _isLoading = false);
+        setState(() =>  isLoading = false);
       }
     }
   }
@@ -104,7 +104,6 @@ class _SendScreenState extends State<SendScreen> {
   }
 
   @override
-  // The build.
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final double containerSize = size.width * 0.6;
@@ -175,7 +174,7 @@ class _SendScreenState extends State<SendScreen> {
                         setState(() {
                           selectedIconButton = 'Files';
                         });
-                        await _pickFiles('Files');
+                        await pickFiles('Files');
                       },
                     ),
                     SendSelectionButton(
@@ -212,7 +211,7 @@ class _SendScreenState extends State<SendScreen> {
                                       size: sizeInBytes,
                                     )
                                     );
-                                    _totalByteSize += sizeInBytes;
+                                    totalByteSize += sizeInBytes;
                                 });
                               }
                             } 
@@ -231,7 +230,7 @@ class _SendScreenState extends State<SendScreen> {
                         setState(() {
                           selectedIconButton = 'Music';
                         });
-                        await _pickFiles('Music');
+                        await pickFiles('Music');
                       },
                     ),
                     SendSelectionButton(
@@ -246,7 +245,7 @@ class _SendScreenState extends State<SendScreen> {
                         setState(() {
                           selectedIconButton = 'Media';
                         });
-                        await _pickMediaFiles();
+                        await pickMediaFiles();
                       },
                     ),
                   ],
@@ -261,7 +260,7 @@ class _SendScreenState extends State<SendScreen> {
                     children: [
                       Text(
 
-                        "${selectedFile.length + selectedMediaFile.length} Files • ${(_totalByteSize / (1024 * 1024)).toStringAsFixed(2)} MB",
+                        "${selectedFile.length + selectedMediaFile.length} Files • ${(totalByteSize / (1024 * 1024)).toStringAsFixed(2)} MB",
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: containerSize * 0.06,
@@ -271,8 +270,8 @@ class _SendScreenState extends State<SendScreen> {
                         onTap: () => setState(() {
                           selectedFile.clear();
                           selectedMediaFile.clear();
-                          _mediaByteSizes.clear();
-                          _totalByteSize = 0;
+                          mediaByteSizes.clear();
+                          totalByteSize = 0;
                           }),
                         child: Container(
                           padding: EdgeInsets.symmetric(
@@ -300,7 +299,7 @@ class _SendScreenState extends State<SendScreen> {
                   child: Stack(
                     children: [
                     Positioned.fill(
-                      child:_isLoading
+                      child:isLoading
                       ? const Center(child: CircularProgressIndicator(color: Color(0xFF258CF4)))
                       : selectedFile.isEmpty && selectedMediaFile.isEmpty
                             ? Center(
@@ -328,7 +327,7 @@ class _SendScreenState extends State<SendScreen> {
                             final mediaIndex = index - selectedFile.length;
                             final mediaFile = selectedMediaFile[mediaIndex];
                             displayName = mediaFile.title?? "Media File";
-                            itemSizeInBytes = _mediaByteSizes[mediaIndex].toDouble(); 
+                            itemSizeInBytes = mediaByteSizes[mediaIndex].toDouble(); 
                             leadingIcon = mediaFile.type == AssetType.video
                             ? Icons.video_collection_rounded:
                             Icons.image_rounded;
@@ -378,13 +377,13 @@ class _SendScreenState extends State<SendScreen> {
                                 GestureDetector(
                                   onTap: () => setState(() {
                                     if(isGeneralFile) {
-                                      _totalByteSize -= selectedFile[index].size;
+                                      totalByteSize -= selectedFile[index].size;
                                       selectedFile.removeAt(index);
                                     } else{
                                       final mediaIndex = index - selectedFile.length;
-                                      _totalByteSize -= _mediaByteSizes[mediaIndex];
+                                      totalByteSize -= mediaByteSizes[mediaIndex];
                                       selectedMediaFile.removeAt(mediaIndex);
-                                      _mediaByteSizes.removeAt(mediaIndex);                 
+                                      mediaByteSizes.removeAt(mediaIndex);                 
                                       }
                                   }),
                                   child: Icon(
@@ -427,8 +426,8 @@ class _SendScreenState extends State<SendScreen> {
                                 setState(() {
                                   selectedFile.clear();
                                   selectedMediaFile.clear();
-                                  _mediaByteSizes.clear();
-                                  _totalByteSize = 0;
+                                  mediaByteSizes.clear();
+                                  totalByteSize = 0;
                                 });
                               }
                             )

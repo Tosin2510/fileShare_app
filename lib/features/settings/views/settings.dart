@@ -13,30 +13,30 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  String _deviceName = '';
-  String _appVersion = '';
-  String _cacheSize = '';
-  bool _animationEnabled = true;
+  String deviceName = '';
+  String appVersion = '';
+  String cacheSize = '';
+  bool animationEnabled = true;
 
   @override
   void initState() {
     super.initState();
-    _loadDeviceName();
-    _loadInfoAbtApp();
-    _loadCacheSize();
-    _loadAnimationPreference();
+    loadDeviceName();
+    loadInfoAbtApp();
+    loadCacheSize();
+    loadAnimationPreference();
   }
 
-  Future<void> _loadDeviceName() async {
+  Future<void> loadDeviceName() async {
     final name = await DeviceNameService.getDeviceName();
     if (mounted) {
       setState(() {
-        _deviceName = name;
+        deviceName = name;
       });
     }
   }
 
-  Future<void> _clearTransferHistory() async {
+  Future<void> clearTransferHistory() async {
     final clear = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -67,8 +67,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _editDeviceName() async {
-    final controller = TextEditingController(text: _deviceName);
+  Future<void> editDeviceName() async {
+    final controller = TextEditingController(text: deviceName);
     final result = await showDialog<String>(
       context: context,
       builder: (_) => AlertDialog(
@@ -97,42 +97,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (result != null) {
       await DeviceNameService.setCustomDeviceName(result);
-      await _loadDeviceName();
+      await loadDeviceName();
     }
   }
 
-  Future<void> _loadAnimationPreference() async {
+  Future<void> loadAnimationPreference() async {
     final prefs = await SharedPreferences.getInstance();
     final allowed = prefs.getBool('animation_enabled') ?? true;
-    if (mounted) setState(() => _animationEnabled = allowed);
+    if (mounted) setState(() => animationEnabled = allowed);
   }
 
 
-  Future<void> _setAnimationPreference(bool val) async {
+  Future<void> setAnimationPreference(bool val) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('animation_enabled', val);
-    setState(() => _animationEnabled = val);
+    setState(() => animationEnabled = val);
   }
 
-  Future<void> _loadCacheSize() async {
+  Future<void> loadCacheSize() async {
     final bytes = await CacheService.getCacheSizeInBytes();
     if (mounted) {
       setState(() {
-        _cacheSize = bytes >= 1024 * 1024
+        cacheSize = bytes >= 1024 * 1024
           ? '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB'
           : '${(bytes / 1024).toStringAsFixed(2)} KB';
       });
     }
   }
 
-  Future<void> _loadInfoAbtApp() async {
+  Future<void> loadInfoAbtApp() async {
     final info = await PackageInfo.fromPlatform();
-    if (mounted) setState(() => _appVersion = '${info.version} ');
+    if (mounted) setState(() => appVersion = '${info.version} ');
   }
 
-  Future<void> _clearCache() async {
+  Future<void> clearCache() async {
     await CacheService.clearCache();
-    await _loadCacheSize();
+    await loadCacheSize();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cache cleared'),)
@@ -155,42 +155,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)
               ),
               const SizedBox(height: 24,),
-              _sectionHeader('General settings'),
-              _settingsRowTile(
+              sectionHeader('General settings'),
+              settingsRowTile(
                 title:'Device name',
-                subtitle: _deviceName,
-                trailing: _actionButton(
+                subtitle: deviceName,
+                trailing: actionButton(
                   'Change',
-                  _editDeviceName,
+                  editDeviceName,
                 )
               ),
-              _anotherTile(
+              anotherTile(
                 title: 'Animations',
-                value: _animationEnabled,
-                onChanged: _setAnimationPreference
+                value:  animationEnabled,
+                onChanged: setAnimationPreference
               ),
-              _settingsRowTile(
+              settingsRowTile(
                 title: 'Clear transfer history',
-                trailing: _actionButton(
+                trailing: actionButton(
                   'Clear',
-                  _clearTransferHistory,
+                  clearTransferHistory,
                 )
               ),
 
-              _settingsRowTile(
+              settingsRowTile(
                 title: 'Clear cache',
-                subtitle: _cacheSize,
-                trailing: _actionButton(
+                subtitle: cacheSize,
+                trailing: actionButton(
                   'Clear',
-                  _clearCache,
+                  clearCache,
                 )
               ),
 
               const SizedBox(height: 24),
-              _sectionHeader('About'),
-              _settingsRowTile(
+              sectionHeader('About'),
+              settingsRowTile(
                 title: 'Version',
-                subtitle: _appVersion,
+                subtitle: appVersion,
               )
             ],
           )
@@ -199,7 +199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _sectionHeader(String title) => Padding(
+  Widget sectionHeader(String title) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 8),
     child: Text(
       title,
@@ -211,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     )
   );
 
-  Widget _settingsRowTile({required String title, String? subtitle, Widget? trailing}) {
+  Widget settingsRowTile({required String title, String? subtitle, Widget? trailing}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -242,7 +242,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _anotherTile({required String title, required bool value, required ValueChanged<bool> onChanged}) {
+  Widget anotherTile({required String title, required bool value, required ValueChanged<bool> onChanged}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -265,7 +265,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _actionButton(String label, VoidCallback onTap) {
+  Widget actionButton(String label, VoidCallback onTap) {
     return ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(

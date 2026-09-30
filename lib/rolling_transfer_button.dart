@@ -15,16 +15,16 @@ class RollingTransferButton extends StatefulWidget{
 }
 
 class _RollingTransferButtonState extends State<RollingTransferButton> with SingleTickerProviderStateMixin {
-List<TransferItem> _transferItems = [];
+List<TransferItem> transferItems = [];
 StreamSubscription<List<TransferItem>>? _sub;
 
   @override
   void initState() {
     super.initState();
-    _transferItems = TransferTracker.instance.items;
+    transferItems = TransferTracker.instance.items;
     _sub = TransferTracker.instance.itemsStream.listen((items) {
       if (mounted) {
-        setState(() => _transferItems = items);
+        setState(() => transferItems = items);
       }
     });
   }
@@ -36,10 +36,10 @@ StreamSubscription<List<TransferItem>>? _sub;
   }
 
   bool get _isTransferActive => 
-     _transferItems.any((val) => val.status == TransferStatus.inProgress || val.status == TransferStatus.waiting);
+     transferItems.any((val) => val.status == TransferStatus.inProgress || val.status == TransferStatus.waiting);
 
   double get _transferProgress {
-    final activeTransfers = _transferItems.where((val) => val.status == TransferStatus.inProgress || val.status == TransferStatus.inProgress || val.status == TransferStatus.waiting,);
+    final activeTransfers = transferItems.where((val) => val.status == TransferStatus.inProgress || val.status == TransferStatus.inProgress || val.status == TransferStatus.waiting,);
     if (activeTransfers.isEmpty) return 0;
     final totalStuff = activeTransfers.fold<int>(0, (sum, val) => sum + val.totalBytes);
     final completed = activeTransfers.fold<int>(0, (sum, val) => sum + val.transferredBytes);

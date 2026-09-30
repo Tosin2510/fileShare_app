@@ -18,49 +18,49 @@ class RadarPulseAnimation extends StatefulWidget {
 }
 
 class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _pulseScale;
-  late Animation<double> _pulseOpacity;
+  late AnimationController controller;
+  late Animation<double> rotationAnimation;
+  late Animation<double> pulseScale;
+  late Animation<double> pulseOpacity;
 
   @override
   void initState() {
     super.initState();
     
-    _controller = AnimationController(
+    controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2800), 
     );
 
-    _rotationAnimation = Tween<double>(begin: 0, end: math.pi).animate(
+    rotationAnimation = Tween<double>(begin: 0, end: math.pi).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: controller,
         curve: Curves.easeInOutCubic,
       ),
     );
 
-    _pulseScale = Tween<double>(begin: 1.0, end: 1.8).animate(
+    pulseScale = Tween<double>(begin: 1.0, end: 1.8).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: controller,
         curve: const Interval(0.1, 0.9, curve: Curves.easeOutCubic),
       ),
     );
 
-    _pulseOpacity = Tween<double>(begin: 0.15, end: 0.0).animate(
+    pulseOpacity = Tween<double>(begin: 0.15, end: 0.0).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: controller,
         curve: const Interval(0.1, 0.9, curve: Curves.linear),
       ),
     );
 
     if (widget.isAnimated) {
-      _controller.repeat(reverse: true);
+      controller.repeat(reverse: true);
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -70,7 +70,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
       width: widget.containerSize, 
       height: widget.containerSize,
       child: AnimatedBuilder(
-        animation: _controller,
+        animation: controller,
         builder: (context, child) {
           return Stack(
             alignment: Alignment.center,
@@ -78,16 +78,16 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
               // The pulsing effect...
               if (widget.isAnimated)
               Transform.scale(
-                scale: _pulseScale.value,
+                scale: pulseScale.value,
                 child: Container(
                   width: widget.containerSize * 0.6,
                   height: widget.containerSize * 0.6,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF258CF4).withValues(alpha: _pulseOpacity.value),
+                    color: const Color(0xFF258CF4).withValues(alpha: pulseOpacity.value),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF258CF4).withValues(alpha: _pulseOpacity.value),
+                        color: const Color(0xFF258CF4).withValues(alpha: pulseOpacity.value),
                         blurRadius: widget.containerSize * 0.15,
                         spreadRadius: 5,
                       ),
@@ -116,7 +116,7 @@ class _RadarPulseAnimationState extends State<RadarPulseAnimation> with SingleTi
               ),
   
               Transform.rotate(
-                angle: widget.isAnimated ? _rotationAnimation.value : 0,
+                angle: widget.isAnimated ? rotationAnimation.value : 0,
                 child: Icon(
                   Icons.swap_calls_rounded,
                   size: widget.containerSize * 0.25,

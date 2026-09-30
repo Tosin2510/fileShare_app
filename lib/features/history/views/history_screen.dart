@@ -16,38 +16,38 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  TransferDirection _activeTab = TransferDirection.received;
-  bool _loading = true;
-  List<Map<String, dynamic>> _hist = [];
-  bool _selectionMethod = false;
-  final Set<String> _selectedItemIds = {};
+  TransferDirection activeTab = TransferDirection.received;
+  bool loading = true;
+  List<Map<String, dynamic>> hist = [];
+  bool selectionMethod = false;
+  final Set<String> selectedItemIds = {};
 
   @override
   void initState() {
     super.initState();
-    _loadHistory();
+    loadHistory();
   }
 
-  Future<void> _loadHistory() async {
+  Future<void> loadHistory() async {
     final rows = await TransferHistoryService.instance.getAllTransferHistory();
     if (mounted) {
       setState(() {
-        _loading = false;
-        _hist = rows;
+        loading = false;
+        hist = rows;
       });
     }
   }
 
-  List<Map<String, dynamic>> get _rows => _hist
-      .where((r) => r['transferDirection'] == _activeTab.name)
+  List<Map<String, dynamic>> get rows => hist
+      .where((r) => r['transferDirection'] == activeTab.name)
       .toList();
 
   Map<String, List<Map<String, dynamic>>> get _dateGrouping {
     final Map<String, List<Map<String, dynamic>>> groups = {};
-    for (final row in _rows) {
+    for (final row in rows) {
       final timeStamp = row['timeStamp'] as int;
       final date = DateTime.fromMillisecondsSinceEpoch(timeStamp);
-      final dateLabel = _dateHeader(date);
+      final dateLabel = dateHeader(date);
       groups.putIfAbsent(dateLabel, () => []).add(row);
     }
     return groups;
@@ -55,15 +55,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _toggleSelected(String id) {
     setState(() {
-      if (_selectedItemIds.contains(id)) {
-        _selectedItemIds.remove(id);
+      if (selectedItemIds.contains(id)) {
+        selectedItemIds.remove(id);
       } else {
-        _selectedItemIds.add(id);
+        selectedItemIds.add(id);
       }
     });
   }
 
-  IconData _icon(String mimeType) {
+  IconData icon(String mimeType) {
     if (mimeType.startsWith('image/')) return Icons.image_rounded;
     if (mimeType.startsWith('video/')) return Icons.videocam_rounded;
     if (mimeType.startsWith('audio/')) return Icons.music_note_rounded;
@@ -71,23 +71,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Icons.insert_drive_file_rounded;
   }
 
-  String _byteFormat(int bytes) {
+  String byteFormat(int bytes) {
     if (bytes >= 1024 * 1024) return '${(bytes/ (1024 * 1024)).toStringAsFixed(2)}MB';
     if (bytes >= 1024) return '${(bytes/ 1024).toStringAsFixed(2)}KB';
     return '${bytes}B';
   }
 
 // Users can choose to delect whatever history they choose.
-  Future<void> _deleteSelectedHistory() async {
-    await TransferHistoryService.instance.deleteTransferHistory(_selectedItemIds.toList());
+  Future<void> deleteSelectedHistory() async {
+    await TransferHistoryService.instance.deleteTransferHistory(selectedItemIds.toList());
     setState(() {
-      _selectedItemIds.clear();
-      _selectionMethod = false;
+      selectedItemIds.clear();
+      selectionMethod = false;
     });
-    await _loadHistory();
+    await loadHistory();
   }
 
-  String _dateHeader(DateTime date) {
+  String dateHeader(DateTime date) {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 
       'September', 'October', 'November', 'December'
@@ -126,14 +126,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
               const SizedBox(height: 16,),
               // For the received and sent history.
               TabToggleDirection(
-                active: _activeTab,
-                onChanged: (direction) => setState(() => _activeTab = direction),
+                active: activeTab,
+                onChanged: (direction) => setState(() => activeTab = direction),
               ),
               const SizedBox(height: 16,),
               Expanded(
-                child: _loading
+                child: loading
                   ? const Center(child: CircularProgressIndicator(color: Color(0xFF258CFA)),)
-                  : _rows.isEmpty
+                  : rows.isEmpty
                     ? const Center(child: Text('No history yet', style: TextStyle(color: Colors.white38))
                 )
                 // The listview is used for easy scrolling.
@@ -155,7 +155,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                         ...entry.value.map((row) => Padding(
                           padding: const EdgeInsets.only(bottom: 10),
-                          child: _buildRow(row)
+                          child: buildRow(row)
                         )
                         ),
                         const SizedBox(height: 8)
@@ -164,14 +164,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   }).toList(),
                 )
               ),
-
-              if (_selectionMethod && _selectedItemIds.isNotEmpty)
+              if (selectionMethod && selectedItemIds.isNotEmpty)    
+              if (selectionMethod && selectedItemIds.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: ElevatedButton.icon(
-                  onPressed: _deleteSelectedHistory,
+                  onPressed: deleteSelectedHistory,
                   icon: const Icon(Icons.delete_rounded, size: 18),
-                  label: Text('Delete (${_selectedItemIds.length})'),
+                  label: Text('Delete (${selectedItemIds.length})'),
                   style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF258CFA),
                   minimumSize: const Size.fromHeight(48)
@@ -185,7 +185,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildRow(Map<String, dynamic> row) {
+  Widget buildRow(Map<String, dynamic> row) {
     final String id = row['id'] as String;
     final String fileName = row['fileName'] as String;
     final String mimeType = row['mimeType'] as String;
@@ -206,9 +206,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
       statusColor = Colors.redAccent;
     }
     Widget trailing;
-    if (_selectionMethod) {
+    if (selectionMethod) {
       trailing = Checkbox(
-        value: _selectedItemIds.contains(id),
+        value: selectedItemIds.contains(id),
         onChanged: (_) => _toggleSelected(id),
         activeColor: const Color(0xFF258CFA),
       );
@@ -235,16 +235,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return GestureDetector(
       onLongPress: () {
         setState(() {
-          _selectionMethod = true;
-          _selectedItemIds.add(id);
+          selectionMethod = true;
+          selectedItemIds.add(id);
         });
       },
       child: FileTransferTile(
         data: TransferTile(
           id: id, 
           fileName: fileName, 
-          icon: _icon(mimeType), 
-          sizeLabel: _byteFormat(totalBytes), 
+          icon: icon(mimeType), 
+          sizeLabel: byteFormat(totalBytes), 
           trailing: trailing,
           statusLabel: statusLabel,
           statusColor: statusColor,

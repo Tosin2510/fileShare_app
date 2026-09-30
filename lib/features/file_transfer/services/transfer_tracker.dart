@@ -10,20 +10,20 @@ class TransferTracker {
   static final TransferTracker instance = TransferTracker._internal();
 
   final List<TransferItem> _items = [];
-  final StreamController<List<TransferItem>> _controller =
+  final StreamController<List<TransferItem>> controller =
     StreamController<List<TransferItem>>.broadcast();
 
-  Stream<List<TransferItem>> get itemsStream => _controller.stream;
+  Stream<List<TransferItem>> get itemsStream => controller.stream;
   List<TransferItem> get items => List.unmodifiable(_items);
 
   void addItem(TransferItem item) {
     _items.add(item);
-    _emit();
+    emit();
   }
 
   void startNewTransferSession() {
     _items.clear();
-    _emit();
+    emit();
   }
 
   void updateProgress(String id, int transferredBytes) {
@@ -31,7 +31,7 @@ class TransferTracker {
     if (item == null) return;
     item.transferredBytes = transferredBytes;
     item.status = TransferStatus.inProgress;
-    _emit();
+    emit();
   }
 
   void markDone(String id, {String? savedPath}) {
@@ -40,7 +40,7 @@ class TransferTracker {
     item.status = TransferStatus.done;
     item.transferredBytes = item.totalBytes;
     if (savedPath != null) item.savedPath = savedPath;
-    _emit();
+    emit();
     TransferHistoryService.instance.recordSharing(item);
   }
   
@@ -49,7 +49,7 @@ class TransferTracker {
     final item = _items.where((i) => i.id == id).firstOrNull;
     if (item == null) return;
     item.status = TransferStatus.failed;
-    _emit();
+    emit();
     TransferHistoryService.instance.recordSharing(item);
   }
 
@@ -57,7 +57,7 @@ class TransferTracker {
     final item = _items.where((i) => i.id == id).firstOrNull;
     if (item == null) return;
     item.status = TransferStatus.paused;
-    _emit();
+    emit();
   }
-  void _emit() => _controller.add(List.from(_items));
+  void emit() => controller.add(List.from(_items));
 }

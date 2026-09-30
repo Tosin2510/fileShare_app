@@ -19,32 +19,32 @@ enum ServerState { stopped, starting, running}
 class ReceiveServer{
   ReceiveServer._internal();
   static final ReceiveServer instance = ReceiveServer._internal();
-  final _multicastLock = FlutterMulticastLock();
-  HttpServer? _server; // This is the engine that is running the network port.
+  final multicastLock = FlutterMulticastLock();
+  HttpServer? server; // This is the engine that is running the network port.
   ServerState _state = ServerState.stopped;
   ServerState get state => _state; 
   bool get isRunning => _state == ServerState.running;
-  final Map<String, IncomingSession> _sessions = {}; 
-  final Map<String, Completer<bool>> _decisionCompleters = {};
+  final Map<String, IncomingSession> sessions = {}; 
+  final Map<String, Completer<bool>> decisionCompleters = {};
 
-  final StreamController<IncomingSession> _sessionController =
+  final StreamController<IncomingSession> sessionController =
      StreamController<IncomingSession>.broadcast();
-  Stream<IncomingSession> get incomingSessionStream => _sessionController.stream;
+  Stream<IncomingSession> get incomingSessionStream => sessionController.stream;
 
-  final StreamController<String> _fileReceivedController = 
+  final StreamController<String> fileReceivedController = 
     StreamController<String>.broadcast();
-  Stream<String> get fileReceivedStream => _fileReceivedController.stream;
+  Stream<String> get fileReceivedStream => fileReceivedController.stream;
 
   Future<void> start() async {
-    await _multicastLock.acquireMulticastLock();
+    await multicastLock.acquireMulticastLock();
     if(state != ServerState.stopped) return;
     _state = ServerState.starting;
     final router = Router();
-    router.post('/prepare', _handlePrepare);
-    router.post('/upload', _handleUpload);
+    router.post('/prepare', handlePrepare);
+    router.post('/upload', handleUpload);
 
     try {
-      _server = await shelf_io.serve(
+      server = await shelf_io.serve(
         router.call,
         '0.0.0.0',
         AppConstant.transferPort,
@@ -55,7 +55,7 @@ class ReceiveServer{
     }
   }
   
-  Future<Response> _handlePrepare(Request request) async {
+  Future<Response> handlePrepare(Request request) async {
   try{
     final String body = await request.readAsString();
     final Map<String, dynamic> json = jsonDecode(body);
@@ -71,19 +71,19 @@ class ReceiveServer{
       senderName: senderName,
       files: files,
     );
-    _sessions[sessionId] = session;
+    sessions[sessionId] = session;
 
     final completer = Completer<bool>();
-    _decisionCompleters[sessionId] = completer;
-    _sessionController.add(session);
+    decisionCompleters[sessionId] = completer;
+      sessionController.add(session);
 
     final bool accepted = await completer.future.timeout(
       const Duration(seconds: 30),
       onTimeout: () => false,
     );
-    _decisionCompleters.remove(sessionId);
+    decisionCompleters.remove(sessionId);
     if (!accepted) {
-      _sessions.remove(sessionId);
+      sessions.remove(sessionId);
     } else {
       // Keeps track of new transfer session.
       TransferTracker.instance.startNewTransferSession();
@@ -114,13 +114,13 @@ class ReceiveServer{
 }
 
 void respondToSession(String sessionId, bool accepted) {
-  final completer = _decisionCompleters[sessionId];
+  final completer = decisionCompleters[sessionId];
   if (completer != null && !completer.isCompleted) {
     completer.complete(accepted);
   }
 }
 
-Future<Response> _handleUpload(Request request) async {
+Future<Response> handleUpload(Request request) async {
   try{
     final String? sessionId = request.url.queryParameters['sessionId'];
 
@@ -131,7 +131,7 @@ Future<Response> _handleUpload(Request request) async {
         body: jsonEncode({'error' : 'Missing sessionId or fileId'}),
         );
     }
-    final IncomingSession? session = _sessions[sessionId];
+    final IncomingSession? session = sessions[sessionId];
     if(session == null) {
       return Response.badRequest(
         body: jsonEncode({'error': 'Session not found'}),
@@ -165,16 +165,16 @@ Future<Response> _handleUpload(Request request) async {
      String finalPath = tempDirPath;
 
      if (incomingFile.mimeType.startsWith('video/') || incomingFile.mimeType.startsWith('image/')) {
-      _saveMediaFiles(tempDirPath, incomingFile.mimeType);
+      saveMediaFiles(tempDirPath, incomingFile.mimeType);
      } else {
-      final SaveInfo? information = await _saveGeneralFileAndReturnInfo(tempDirPath, incomingFile.name, incomingFile.mimeType);
+      final SaveInfo? information = await saveGeneralFileAndReturnInfo(tempDirPath, incomingFile.name, incomingFile.mimeType);
       if (information != null && information.isSuccessful) {
         finalPath = information.uri.toString();
       }
      }
 
      TransferTracker.instance.markDone(fileId, savedPath: finalPath);
-     _fileReceivedController.add(tempDirPath);
+    fileReceivedController.add(tempDirPath);
      debugPrint('File saved: $tempDirPath');
 
      return Response.ok(
@@ -189,7 +189,7 @@ Future<Response> _handleUpload(Request request) async {
   }
 }
 
-Future<void> _saveMediaFiles(String filePath, String mimeType) async {
+Future<void> saveMediaFiles(String filePath, String mimeType) async {
   try{
     if (mimeType.startsWith('image/')) {
       await Gal.putImage(filePath);
@@ -198,11 +198,11 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
       await Gal.putVideo(filePath);
     }
   } on GalException catch (e) {
-    debugPrint(_galErrorMessage(e.type));
+    debugPrint(galErrorMessage(e.type));
   } 
 }
 
- String _galErrorMessage(GalExceptionType exception) {
+ String galErrorMessage(GalExceptionType exception) {
     switch(exception) {
       case GalExceptionType.accessDenied : 
         return 'You have no permission to access device\'s gallery';
@@ -215,8 +215,8 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
      }
     }
 
-    final MediaStore _mediaStore = MediaStore();
-    Future<SaveInfo?> _saveGeneralFileAndReturnInfo(String tempFilePath, String fileName, String mimeType) async {
+    final MediaStore mediaStore = MediaStore();
+    Future<SaveInfo?> saveGeneralFileAndReturnInfo(String tempFilePath, String fileName, String mimeType) async {
       try {
         // The directory type and name are gotten.
         final DirType dirType;
@@ -228,7 +228,7 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
           dirType = DirType.download;
           dirName = DirName.download;
         }
-        return await _mediaStore.saveFile(
+        return await mediaStore.saveFile(
           tempFilePath: tempFilePath, 
           dirType: dirType, 
           dirName: dirName,
@@ -240,21 +240,21 @@ Future<void> _saveMediaFiles(String filePath, String mimeType) async {
     }
 
 Future<void> stop() async {
-  await _server?.close(force: true);
-  _server = null;
-  _sessions.clear();
+  await server?.close(force: true);
+  server = null;
+  sessions.clear();
   _state = ServerState.stopped;
-  await _multicastLock.releaseMulticastLock();
+  await multicastLock.releaseMulticastLock();
   debugPrint('Receive server stopped');
 }
 Future<void> dispose() async {
   await stop();
-  for (final c in _decisionCompleters.values) {
+  for (final c in decisionCompleters.values) {
     if (!c.isCompleted) c.complete(false);
   }
-  _decisionCompleters.clear();
-  await _sessionController.close();
-  await _fileReceivedController.close();
+  decisionCompleters.clear();
+  await sessionController.close();
+  await fileReceivedController.close();
 }
 }
 

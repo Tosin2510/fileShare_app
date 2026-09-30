@@ -16,14 +16,14 @@ class TabToggleDirection extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _tab('RECEIVED', TransferDirection.received),
-          _tab('SENT', TransferDirection.sent),
+          tab('RECEIVED', TransferDirection.received),
+          tab('SENT', TransferDirection.sent),
         ]
       )
     );
   }
 
-  Widget _tab(String label, TransferDirection direction) {
+  Widget tab(String label, TransferDirection direction) {
     final bool isActive = active == direction;
     return Expanded(
       child: GestureDetector(

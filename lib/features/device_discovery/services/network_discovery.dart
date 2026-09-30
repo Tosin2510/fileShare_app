@@ -6,54 +6,53 @@ import 'package:flutter/material.dart';
 
 enum DiscoveryState {idle, starting, stopping, scanning}
 class NetworkDiscovery {
-  BonsoirDiscovery? _discovery;
-  StreamSubscription<BonsoirDiscoveryEvent>? _discoverySubscription;
+  BonsoirDiscovery? discovery;
+  StreamSubscription<BonsoirDiscoveryEvent>? discoverySubscription;
   DiscoveryState _state = DiscoveryState.idle;
   final List<BonsoirService> discoveredDevices = [];
-  List<String> _selfIps = [];
-  Timer? _livenessCheckTimer; 
+  List<String> selfIps = [];
+  Timer? livenessCheckTimer; 
 
-  final StreamController<List<BonsoirService>> _deviceController = 
+  final StreamController<List<BonsoirService>> deviceController = 
   StreamController<List<BonsoirService>>.broadcast();
-  Stream <List<BonsoirService>> get deviceStream => _deviceController.stream;
+  Stream <List<BonsoirService>> get deviceStream => deviceController.stream;
   bool get isScanning => _state == DiscoveryState.scanning;
   DiscoveryState get state => _state;
 
   Future<void> startScanning() async {
     if(_state!= DiscoveryState.idle) return;
     _state = DiscoveryState.starting;
-    _selfIps = await _getAllLocalIps();
-    debugPrint('Self Ips detected: $_selfIps');
+    selfIps = await getAllLocalIps();
       discoveredDevices.clear();
-      if (!_deviceController.isClosed) {
-        _deviceController.add([]);
+      if (!deviceController.isClosed) {
+        deviceController.add([]);
       }
       try {
-        _discovery = BonsoirDiscovery(type: AppConstant.serviceType);
-        await _discovery!.initialize();
-        _discoverySubscription = _discovery!.eventStream?.listen((event) {
+        discovery = BonsoirDiscovery(type: AppConstant.serviceType);
+        await discovery!.initialize();
+        discoverySubscription = discovery!.eventStream?.listen((event) {
           handleDiscoveryEvent(event);
         });
-        await _discovery!.start();
+        await discovery!.start();
         _state = DiscoveryState.scanning;
-        _startLivenessCheck();
+        startLivenessCheck();
         debugPrint('Local Network scanning service active');
       } catch(e) {
         debugPrint('Failure initializing discovery: $e');
-        await _discoverySubscription?.cancel();
-        _discoverySubscription = null;
-        _discovery = null;
+        await discoverySubscription?.cancel();
+        discoverySubscription = null;
+        discovery = null;
         _state = DiscoveryState.idle;
       }
   }
-  void _startLivenessCheck() {
-    _livenessCheckTimer?.cancel();
-    _livenessCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
+  void startLivenessCheck() {
+    livenessCheckTimer?.cancel();
+    livenessCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
       if (_state != DiscoveryState.scanning) return;
       final snapshot = List<BonsoirService>.from(discoveredDevices);
       bool changed = false;
         for (final device in snapshot) {
-          final alive = await _isReachable(device.hostAddress, device.port);
+          final alive = await isReachable(device.hostAddress, device.port);
           if (_state != DiscoveryState.scanning) return;
           if (!alive) {
             discoveredDevices.removeWhere((d) => d.name == device.name);
@@ -61,13 +60,13 @@ class NetworkDiscovery {
             changed = true;
         }
     }
-    if (changed && !_deviceController.isClosed) {
-      _deviceController.add(List.from(discoveredDevices));
+    if (changed && !deviceController.isClosed) {
+      deviceController.add(List.from(discoveredDevices));
     }
   });
   }
 
-  Future<bool> _isReachable(String? ip, int? port) async {
+  Future<bool> isReachable(String? ip, int? port) async {
     if (ip == null || port == null) return false;
     try {
       final socket = await Socket.connect(ip, port, timeout: const Duration(seconds: 3)); 
@@ -78,7 +77,7 @@ class NetworkDiscovery {
     }
   } 
 
-  Future<List<String>> _getAllLocalIps() async {
+  Future<List<String>> getAllLocalIps() async {
     final ips = <String> [];
     try {
       final interfaces = await NetworkInterface.list(
@@ -98,16 +97,16 @@ class NetworkDiscovery {
   Future<void> stopScanning() async {
     if (_state == DiscoveryState.idle || _state == DiscoveryState.stopping) return; 
       _state = DiscoveryState.stopping;
-      _livenessCheckTimer?.cancel();
-      _livenessCheckTimer = null; 
+      livenessCheckTimer?.cancel();
+      livenessCheckTimer = null; 
       try {
-        await _discoverySubscription?.cancel();
-        _discoverySubscription = null;
-        await _discovery?.stop();
+        await discoverySubscription?.cancel();
+        discoverySubscription = null;
+        await discovery?.stop();
       } catch(e) {
         debugPrint('Error stopping discovery service $e');
       } finally {
-        _discovery = null;
+        discovery = null;
         _state = DiscoveryState.idle;
         debugPrint('Local network scanning has stopped cleanly');
       }
@@ -117,23 +116,23 @@ class NetworkDiscovery {
     if(state != DiscoveryState.scanning) return;
     switch(event) {
       case BonsoirDiscoveryServiceFoundEvent():
-      if(_discovery == null) return;
-       event.service.resolve(_discovery!.serviceResolver);
+      if(discovery == null) return;
+       event.service.resolve(discovery!.serviceResolver);
        break;
       case BonsoirDiscoveryServiceResolvedEvent():
       final resolvedIp = event.service.hostAddress;
-      if (resolvedIp != null && _selfIps.contains(resolvedIp)) return;
+      if (resolvedIp != null && selfIps.contains(resolvedIp)) return;
        
        discoveredDevices.removeWhere((device) => device.name == event.service.name);
        discoveredDevices.add(event.service);
-       if (!_deviceController.isClosed) {
-        _deviceController.add(List.from(discoveredDevices));
+       if (!deviceController.isClosed) {
+        deviceController.add(List.from(discoveredDevices));
        }
        debugPrint('Service resolved: ${event.service.name} at ${event.service.port} '); break;
       case BonsoirDiscoveryServiceLostEvent(): 
        discoveredDevices.removeWhere((device) => device.name == event.service.name);
-       if (!_deviceController.isClosed) {
-         _deviceController.add(List.from(discoveredDevices));
+       if (!deviceController.isClosed) {
+          deviceController.add(List.from(discoveredDevices));
        }
        debugPrint('Service Lost: ${event.service.name}');
        break;
@@ -143,7 +142,7 @@ class NetworkDiscovery {
   }
   Future<void> dispose() async{
     await stopScanning();
-    await _deviceController.close();
+    await deviceController.close();
     debugPrint('Network discovery engine tracking resources successfully released');
   }
 }

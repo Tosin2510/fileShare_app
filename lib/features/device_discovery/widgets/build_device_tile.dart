@@ -6,9 +6,9 @@ class BuildDeviceTile extends StatelessWidget{
   final double containerSize;
   final VoidCallback? onTap;
 
-  static const Color _cardColor = Color(0xFF1F1F1F);
-  static const Color _accentBlue = Color(0xFF334155);
-  static const Color _subtleText = Color(0xFF9DA6B9);
+  static const Color cardColor = Color(0xFF1F1F1F);
+  static const Color accentBlue = Color(0xFF334155);
+  static const Color subtleText = Color(0xFF9DA6B9);
   const BuildDeviceTile({
     super.key,
     required this.device,
@@ -17,7 +17,7 @@ class BuildDeviceTile extends StatelessWidget{
 
   });
 
-  IconData _deviceIcon(String platform) {
+  IconData deviceIcon(String platform) {
     switch(platform.toLowerCase()) {
       case 'android':
         return Icons.android_rounded;
@@ -39,7 +39,7 @@ class BuildDeviceTile extends StatelessWidget{
           vertical: containerSize * 0.055,
         ),
         decoration: BoxDecoration(
-          color: _cardColor,
+          color: cardColor,
           borderRadius: BorderRadius.circular(containerSize * 0.06),
           border: Border.all(
             color: Colors.white.withValues(alpha: 0.06),
@@ -52,11 +52,11 @@ class BuildDeviceTile extends StatelessWidget{
               width: containerSize * 0.14,
               height: containerSize * 0.14,
               decoration: BoxDecoration(
-                color: _accentBlue,
+                color: accentBlue,
                 borderRadius: BorderRadius.circular(containerSize * 0.04),
               ),
               child: Icon(
-                _deviceIcon(platform),
+                deviceIcon(platform),
                 color: Colors.white,
                 size: containerSize*0.09,
               ),
@@ -80,7 +80,7 @@ class BuildDeviceTile extends StatelessWidget{
                         // The port, the version as well as the platform displayed.
                         '#${device.port}  •  $platform${version.isNotEmpty? '  v$version': ''}',
                         style: TextStyle(
-                          color: _subtleText,
+                          color:  subtleText,
                           fontSize: containerSize * 0.06,
                           fontWeight: FontWeight.w400,
                           letterSpacing: 0.3

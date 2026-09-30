@@ -5,12 +5,12 @@ import 'package:sqflite/sqflite.dart';
 class TransferHistoryService {
   TransferHistoryService._internal();
   static final TransferHistoryService instance = TransferHistoryService._internal();
-  Database? _database;
+  Database? database;
   Future<Database> get _db async {
-    if (_database != null) return _database!;
+    if (database != null) return database!;
     final path = join(await getDatabasesPath(), 'file_transfer_history.db');
     // I am making use of open database here.
-    _database = await openDatabase(
+    database = await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) async {
@@ -29,7 +29,7 @@ class TransferHistoryService {
             );
           },
         );
-        return _database!;
+        return database!;
       }
 
       Future<void> recordSharing(TransferItem item) async {

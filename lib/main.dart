@@ -61,22 +61,22 @@ class AppRoot extends StatefulWidget { // ADD THIS BACK
 }
 
 class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
-  final NetworkBroadcasting _broadcasting = NetworkBroadcasting();
-  final ReceiveServer _receiveServer = ReceiveServer.instance;
-  StreamSubscription<IncomingSession>? _sessionSubscription;
+  final NetworkBroadcasting broadcasting = NetworkBroadcasting();
+  final ReceiveServer receiveServer = ReceiveServer.instance;
+  StreamSubscription<IncomingSession>? sessionSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initBroadcasting();
-    _receiveServer.start();
-    _sessionSubscription = _receiveServer.incomingSessionStream.listen((session) {
-      _showIncomingGlobalDialog(session);
+    initBroadcasting();
+    receiveServer.start();
+    sessionSubscription = receiveServer.incomingSessionStream.listen((session) {
+      showIncomingGlobalDialog(session);
     });
   }
 
-  void _showIncomingGlobalDialog(IncomingSession session) {
+  void showIncomingGlobalDialog(IncomingSession session) {
     final cont = rootNavigatorKey.currentContext;
     if (cont == null) return;
     final totalFileSizes = session.files.fold<int>(0, (sum, fn) => sum + fn.size);
@@ -96,14 +96,14 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
         actions: [
           TextButton(
             onPressed: () {
-              _receiveServer.respondToSession(session.sessionId, false);
+              receiveServer.respondToSession(session.sessionId, false);
               Navigator.pop(cont);
             },
             child: const Text('Decline', style: TextStyle(color: Colors.redAccent))
           ),
           ElevatedButton(
             onPressed: () {
-              _receiveServer.respondToSession(session.sessionId, true);
+              receiveServer.respondToSession(session.sessionId, true);
               Navigator.pop(cont);
               rootNavigatorKey.currentState?.push(
                 MaterialPageRoute(
@@ -119,22 +119,21 @@ class _AppRootState extends State<AppRoot> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    debugPrint('=== LIFECYCLE === $state at ${DateTime.now()}');
   }
 
   @override
   void dispose() {
     debugPrint('=== APPROOT DISPOSE CALLED at ${DateTime.now()} ===');
     WidgetsBinding.instance.removeObserver(this);
-    _sessionSubscription?.cancel();
-    _broadcasting.dispose();
-    _receiveServer.dispose();
+    sessionSubscription?.cancel();
+    broadcasting.dispose();
+    receiveServer.dispose();
     super.dispose();
   }
 
-  Future<void> _initBroadcasting() async {
+  Future<void> initBroadcasting() async {
     final deviceName = await DeviceNameService.getDeviceName();
-    await _broadcasting.startBroadcasting(deviceName: deviceName);
+    await broadcasting.startBroadcasting(deviceName: deviceName);
   }
 
   @override

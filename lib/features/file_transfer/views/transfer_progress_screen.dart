@@ -14,40 +14,41 @@ class TransferProgressScreen extends StatefulWidget{
 }
 
 class _TransferProgressScreenState extends State<TransferProgressScreen> {
-  TransferDirection _activeTab = TransferDirection.received;
-  List<TransferItem> _items = [];
-  StreamSubscription<List<TransferItem>>? _sub;
+  TransferDirection activeTab = TransferDirection.received;
+  List<TransferItem> items = [];
+  StreamSubscription<List<TransferItem>>? sub;
 
   @override
   void initState() {
     super.initState();
 
     TransferProgressScreen.isVisible = true;
-    _items = TransferTracker.instance.items;
-    _sub = TransferTracker.instance.itemsStream.listen((items) {
-      if (mounted) setState(() => _items = items);
+    items = TransferTracker.instance.items;
+    sub = TransferTracker.instance.itemsStream.listen((items) {
+      if (mounted) setState(() => items = items);
     });
   }
   @override
   void dispose() {
     TransferProgressScreen.isVisible = false;
-    _sub?.cancel();
+    sub?.cancel();
     super.dispose();
   }
 
-  List<TransferItem> get _filteredItems => 
-     _items.where((i) => i.direction == _activeTab).toList();
+  List<TransferItem> get filteredItems => 
+     items.where((i) => i.direction == activeTab).toList();
 
-  int get _totalBytes => _filteredItems.fold(0, (sum, i) => sum + i.totalBytes);
-  int get _transferredBytes => _filteredItems.fold(0, (sum, i) => sum + i.transferredBytes);
 
-  String _formatBytes(int bytes) {
+  int get totalBytes => filteredItems.fold(0, (sum, i) => sum + i.totalBytes);
+  int get transferredBytes => filteredItems.fold(0, (sum, i) => sum + i.transferredBytes);
+
+  String formatBytes(int bytes) {
     if (bytes >= 1024 * 1024) return '${(bytes/ (1024 * 1024)).toStringAsFixed(1)}MB';
     if (bytes >= 1024) return '${(bytes/ 1024).toStringAsFixed(1)}KB';
     return '${bytes}B';
   }
 
-  IconData _iconFor(String mimeType) {
+  IconData iconFor(String mimeType) {
     if (mimeType.startsWith('image/')) return Icons.image_rounded;
     if (mimeType.startsWith('video/')) return Icons.videocam_rounded;
     if (mimeType.startsWith('audio/')) return Icons.music_note_rounded;
@@ -58,7 +59,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final double overallProgress = _totalBytes == 0 ? 0 : _transferredBytes / _totalBytes;
+    final double overallProgress = totalBytes == 0 ? 0 : transferredBytes / totalBytes;
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
       body: SafeArea(
@@ -82,8 +83,8 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
               ],),
               const SizedBox(height: 16),
               TabToggleDirection(
-                active: _activeTab,
-                onChanged: (direction) => setState(() => _activeTab = direction),
+                active: activeTab,
+                onChanged: (direction) => setState(() =>  activeTab = direction),
               ),
               
               const SizedBox(height: 16),
@@ -116,7 +117,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
                             ),
                           ),
                           Text(
-                            '${_formatBytes(_transferredBytes)}/${_formatBytes(_totalBytes)}',
+                            '${formatBytes(transferredBytes)}/${formatBytes(totalBytes)}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -132,12 +133,12 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
               ),
               const SizedBox(height: 16,),
               Flexible(
-                child: _filteredItems.isEmpty
+                child: filteredItems.isEmpty
                    ? Padding(
                     padding: EdgeInsets.symmetric(vertical: size.height * 0.06),
                     child: Center(
                       child: Text(
-                        _activeTab == TransferDirection.received
+                        activeTab == TransferDirection.received
                            ? 'No files received yet'
                            : 'No files sent yet',
                         style: const TextStyle(color: Colors.white38),
@@ -146,9 +147,9 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
                   )
                   : ListView.separated(
                     shrinkWrap: true,
-                    itemBuilder: (context, index) => _buildItemRow(_filteredItems[index]), 
+                    itemBuilder: (context, index) => buildItemRow(filteredItems[index]), 
                     separatorBuilder: (_, _) => const SizedBox(height: 10), 
-                    itemCount: _filteredItems.length
+                    itemCount: filteredItems.length
                   )
               )
           ],
@@ -158,7 +159,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
     );
   }
   
-  Widget _buildItemRow(TransferItem item) {
+  Widget buildItemRow(TransferItem item) {
     return  Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -174,7 +175,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
               color: const Color(0xFF334155),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(_iconFor(item.mimeType), color: Colors.white, size: 22,),
+            child: Icon(iconFor(item.mimeType), color: Colors.white, size: 22,),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -191,7 +192,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
                 ),
                 const SizedBox(height: 4,),
                 Text(
-                  '${_formatBytes(item.totalBytes)} • ${_statusLabel(item.status)}',
+                  '${formatBytes(item.totalBytes)} • ${statusLabel(item.status)}',
                   style: TextStyle(
                     color: item.status == TransferStatus.failed
                        ? Colors.redAccent
@@ -202,13 +203,13 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
               ],
             )
           ),
-          _buildTrailing(item),
+          buildTrailing(item),
         ],
       ),
     );
   }
 
-  String _statusLabel(TransferStatus status) {
+  String statusLabel(TransferStatus status) {
     switch (status) {
       case TransferStatus.waiting: 
         return 'Waiting';
@@ -223,7 +224,7 @@ class _TransferProgressScreenState extends State<TransferProgressScreen> {
     }
   }
 
-  Widget _buildTrailing(TransferItem item) {
+  Widget buildTrailing(TransferItem item) {
     switch (item.status) {
       case TransferStatus.inProgress:
         return SizedBox(
