@@ -16,7 +16,7 @@ Devices find each other with mDNS, using the [bonsoir](https://pub.dev/packages/
 
 Because of this, both phones should be on the same local network. Either
 
-- both phones are on the same Wi-Fi, or
+- both phones are on the same third-party Wi-Fi, or
 - one phone has its hotspot on and the other connects to it
 
 You have to manually turn the hotspot on yourself. Turning it on automatically from Flutter is really hard (close to impossible), so I left it manual. The phones just need to be able to reach each other. If you don't see a nearby device, check that first or refresh again.
