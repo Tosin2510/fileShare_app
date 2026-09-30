@@ -1,76 +1,72 @@
 # FileShare
 
-This is a local network file-sharing app that is built using Flutter, inspired by apps like LocalSend and Airdrop on ios. FileShare allows you to send files, photos, videos, music, documents, and even installed apps (APKs) between two Android devices without an internet connection.
+A file sharing app I built with Flutter. You pick some files, it finds another phone nearby, and you send them. It works kind of like LocalSend or AirDrop, but Android only for now. No internet needed.
 
-## Why I built this
+I built it because I wanted something simple for sending stuff between phones, and because it is actually a good project for my portfolio.
 
-Most file-sharing apps either need both people to be online, or they're bloated with ads and unrelated features. I wanted something simple: pick your files, find a nearby device, send. No accounts, no cloud, no internet required, just your local network. Also, i built this because it is an interesting project to work on
+## Download
+
+You can get the APK from the [Releases page](https://github.com/Tosin2510/fileShare_app/releases/latest) and install it on your phone. You should also allow installs from unknown sources when it pops up on your android device. Note, both phones need the app.
+
+Nothing else to set up. Just install it, accept the permissions and you're good.
 
 ## How it works
 
-FileShare uses **mDNS (multicast DNS)** via the flutter bonsoir [bonsoir](https://pub.dev/packages/bonsoir) package to discover other devices that has the app currently running on the same local network. Once a device has been found, an HTTP server which I built with shelf [shelf](https://pub.dev/packages/shelf) handles the actual device handshake and file transfer between the two phones(android for now).
+Devices find each other with mDNS, using the [bonsoir](https://pub.dev/packages/bonsoir) package. Once a phone pops up, an handshake happens and file transfer happens through an http server i set up with shelf [shelf](https://pub.dev/packages/shelf).
 
-**For a file transfer to work, both devices need to be on the same local network.** In this case, this either :
+Because of this, both phones should be on the same local network. Either
 
-- Both phones are connected to the same Wi-Fi network (like a home router), **or**
-- One phone turns on its mobile hotspot, and the other phone connects to that hotspot manually.
+- both phones are on the same Wi-Fi, or
+- one phone has its hotspot on and the other connects to it
 
-This is a deliberate design choice I made...since there's no server or cloud involved, both devices genuinely need to be reachable on the same network for discovery and transfer to happen.Also, the manual hotspot turning on option is because it is hard if not nearly impossible to implement automatic hotspot switching on in flutter. If you're not seeing a nearby device, the first thing to check is whether both phones are actually on the same network.
+You have to manually turn the hotspot on yourself. Turning it on automatically from Flutter is really hard (close to impossible), so I left it manual. The phones just need to be able to reach each other. If you don't see a nearby device, check that first or refresh again.
 
-## Features
+## What it does
 
-- **Send** — pick media (photos/videos), music, documents, or installed apps, then send them to any discovered nearby device.
-- **Receive** — your device broadcasts itself on the network automatically, and shows an accept/decline prompt whenever someone tries to send you files.
-- **Transfer progress** — live progress tracking for both sent and received files, with a small floating indicator that stays visible even if you navigate away mid-transfer.
-- **History** — a record of past transfers, grouped by date, with the ability to reopen received files directly or clear old entries.
-- **Settings** — change your device's display name (what other devices see you as), toggle UI animations, and clear cached/temporary files.
+- Send photos, videos, music, documents, or even installed apps (as APKs) to any device it finds
+- A list of devices available on the local network
+- Progress tracking for the transfer progress as well as a button that leads back to the transfer screen if you leave the screen.
+- History of past transfers grouped by date.
+- Settings to change your device name, turn animations off as well as clear cached files
 
-Received images and videos are saved straight to your device's Gallery, and other files (documents, APKs, music) go to your Downloads folder and other folders like the APK folder, the audio folder(if any exists) so everything ends up where you can actually expect to find it, not buried in some app-only folder.
+Received photos and videos go straight to the device Gallery and APKs and audio go to their respective folder. You can also find the files in the download folder.
 
-## Platform support
+## Built with
 
-Right now, FileShare is **Android only**. iOS isn't supported yet, a lot of the underlying mechanics like background network access, reading a device's own hotspot info, saving files into shared system folders work very differently on iOS, and would need separate work to support properly.
+Flutter and Dart
 
-## Tech stack
+- bonsoir for device discovery
+- shelf and shelf_router for the setting up of the local server
+- dio for uploading from the sender side
+- sqflite for the history database
+- gal and media_store_plus for saving files to the right folders
+- wechat_assets_picker and file_picker for choosing files
+- installed_apps for picking apps to share
 
-- **Flutter / Dart**
-- **bonsoir** — mDNS-based device discovery and broadcasting
-- **shelf / shelf_router** — local HTTP server for the send/receive handshake and file streaming
-- **dio** — handling the sender side of file uploads
-- **sqflite** — local database for transfer history
-- **gal** / **media_store_plus** — saving received files into the correct system folders (Gallery, Downloads, etc.)
-- **wechat_assets_picker** / **file_picker** — picking photos, videos, and files to send
-- **installed_apps** — picking and locating installed apps to share as APKs
+## Running it from source
 
-## Getting started
+You need the Flutter SDK. Two real Android phones are best for testing. An emulator will run the app, but you'd still need a second device or emulator on the same network to send anything.
 
-## Prerequisites
-Flutter SDK installed and set up
-An Android device or emulator, two physical Android devices are recommended for actually testing transfers but an emulator can run the app, but you'll need a second real device (or a second emulator on the same network) to send/receive between
+1. `git clone https://github.com/Tosin2510/fileShare_app.git`
+2. `cd fileShare_app`
+3. `flutter pub get`
+4. Connect a device and run `flutter run`
 
-## Setup
+For a release APK: `flutter build apk --release`
 
-1. Clone the repository:
-   git clone https://github.com/Tosin2510/fileShare_app.git
-   cd fileShare_app
-2. Install dependencies:
-   flutter pub get
-3. Connect a device or start an emulator, then run:
-   flutter run
-4. Building a release APK
-   flutter build apk --release
+## Things that don't work well yet
 
-## Testing It
-Test it using preferaly two physical android devices, accept the permissions and carry on with transfer.
+- Both phones have to be on the same network. There's no way to connect two phones that are not on the same local network.
+- Android only for now
+- Sending a lot of files at once can take a while to start.
 
+The project is basically still a work in progress.
 
-## Known limitations
+## Screenshots from the app
 
-- Both devices must be on the same local network, there's currently no way to auto-connect two phones that are not already sharing a network.
-- Android only, for now.
-- Large batch transfers (i.e lots of files at once) can take a moment to prepare on the sending side, since each file needs to be read and sized before sending begins.
+<img width="271" height="616" alt="image" src="https://github.com/user-attachments/assets/0b6bcb7f-4902-4ac6-b2e2-a09e06d1b5a3" />
+<img width="279" height="609" alt="image" src="https://github.com/user-attachments/assets/e12df0de-f79e-46b8-bf7d-770c5ba4ae06" />
+<img width="269" height="612" alt="image" src="https://github.com/user-attachments/assets/51d16acc-1fed-4a0d-86cf-30cf5eabe0c9" />
+<img width="267" height="602" alt="image" src="https://github.com/user-attachments/assets/7ef7d944-0e96-4165-8880-8df9a02b1714" />
 
-## Status
-
-This is an actively developed personal project, I will continue to refine the transfer flow, UI polish, and reliability across different devices and versions.
 
